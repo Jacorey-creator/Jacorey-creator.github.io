@@ -22,5 +22,6 @@ const projects = [
       <a href="${project.link}" target="_blank">View on GitHub</a>
     `;
     projectList.appendChild(card);
+    console.log("home_controller.js is loaded");
   });
   
