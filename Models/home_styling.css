@@ -8,12 +8,12 @@
   body {
     font-family: 'Segoe UI', sans-serif;
     line-height: 1.6;
-    color: #333;
-    background: #f9f9f9;
+    color: #f0f0f0;
+    background: #121212;
   }
   
   header {
-    background: #333;
+    background: #1f1f1f;
     color: #fff;
     padding: 1rem;
   }
@@ -31,12 +31,16 @@
   }
   
   .nav-links a {
-    color: white;
+    color: #f0f0f0;
     text-decoration: none;
   }
   
+  .nav-links a:hover {
+    color: #80cbc4;
+  }
+  
   #hero {
-    background: #005f73;
+    background: #263238;
     color: #fff;
     padding: 3rem 1rem;
     text-align: center;
@@ -55,16 +59,30 @@
   }
   
   .project-card {
-    background: white;
+    background: #1e1e1e;
     padding: 1rem;
-    border: 1px solid #ccc;
+    border: 1px solid #333;
     border-radius: 8px;
+    transition: transform 0.2s ease;
+  }
+  
+  .project-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .project-card a {
+    color: #80cbc4;
+    text-decoration: none;
+  }
+  
+  .project-card a:hover {
+    text-decoration: underline;
   }
   
   footer {
     text-align: center;
     padding: 1rem;
-    background: #333;
+    background: #1f1f1f;
     color: white;
   }
   

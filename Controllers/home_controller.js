@@ -2,12 +2,12 @@ const projects = [
     {
       title: "Project One",
       description: "A short description of the project.",
-      link: "https://github.com/yourname/project-one"
+      link: "https://github.com/Jacorey-creator/Tactical_Armored_Nanite_Kaizen"
     },
     {
       title: "Project Two",
       description: "Another cool project you worked on.",
-      link: "https://github.com/yourname/project-two"
+      link: "https://github.com/Jacorey-creator/AI-420"
     }
   ];
   
