@@ -13,7 +13,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Configure multer for file uploads
@@ -128,6 +128,9 @@ app.post('/api/projects', authenticateToken, upload.fields([
         const files = req.files['projectFiles']?.map(file => `/uploads/${file.filename}`) || [];
         const images = req.files['imageGallery']?.map(file => `/uploads/${file.filename}`) || [];
 
+        console.log('Uploaded files:', req.files);
+        console.log('Image paths:', images);
+
         const project = new Project({
             name: projectName,
             description,
@@ -137,6 +140,7 @@ app.post('/api/projects', authenticateToken, upload.fields([
         });
 
         await project.save();
+        console.log('Saved project:', project);
         res.status(201).json(project);
     } catch (error) {
         console.error('Error creating project:', error);
@@ -178,6 +182,7 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
 app.get('/api/projects', async (req, res) => {
     try {
         const projects = await Project.find().sort({ createdAt: -1 });
+        console.log('Projects found:', projects); // Debug log
         res.json(projects);
     } catch (error) {
         console.error('Error fetching projects:', error);
@@ -185,14 +190,30 @@ app.get('/api/projects', async (req, res) => {
     }
 });
 
+// Add debug route for checking image paths
+app.get('/api/debug/images', async (req, res) => {
+    try {
+        const projects = await Project.find();
+        const imagePaths = projects.map(project => ({
+            projectName: project.name,
+            images: project.images
+        }));
+        res.json(imagePaths);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Add a route to check if an image exists
-app.get('/uploads/:filename', (req, res, next) => {
+app.get('/uploads/:filename', (req, res) => {
     const filename = req.params.filename;
     const filepath = path.join(__dirname, 'public/uploads', filename);
+    console.log('Attempting to serve image:', filepath);
     
     if (fs.existsSync(filepath)) {
         res.sendFile(filepath);
     } else {
+        console.log('Image not found:', filepath);
         res.status(404).send('Image not found');
     }
 });
