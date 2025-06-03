@@ -3,86 +3,200 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-  }
-  
-  body {
+}
+
+body {
     font-family: 'Segoe UI', sans-serif;
     line-height: 1.6;
-    color: #f0f0f0;
+    color: #ffffff;
     background: #121212;
-  }
-  
-  header {
+}
+
+header {
     background: #1f1f1f;
     color: #fff;
     padding: 1rem;
-  }
-  
-  nav {
+}
+
+nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .nav-links {
+}
+
+.nav-links {
     list-style: none;
     display: flex;
     gap: 1rem;
-  }
-  
-  .nav-links a {
-    color: #f0f0f0;
+}
+
+.nav-links a {
+    color: #ffffff;
     text-decoration: none;
-  }
-  
-  .nav-links a:hover {
+    font-size: 1.1rem;
+}
+
+.nav-links a:hover {
     color: #80cbc4;
-  }
-  
-  #hero {
+}
+
+#hero {
     background: #263238;
     color: #fff;
     padding: 3rem 1rem;
     text-align: center;
-  }
-  
-  section {
+}
+
+section {
     padding: 2rem 1rem;
     max-width: 900px;
     margin: 0 auto;
-  }
-  
-  .project-list {
+}
+
+section h2 {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+section p {
+    color: #e0e0e0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+}
+
+.project-list {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-  
-  .project-card {
-    background: #1e1e1e;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
     padding: 1rem;
+}
+
+.project-card {
+    background: #1e1e1e;
+    padding: 1.5rem;
     border: 1px solid #333;
-    border-radius: 8px;
-    transition: transform 0.2s ease;
-  }
-  
-  .project-card:hover {
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.project-card:hover {
     transform: translateY(-5px);
-  }
-  
-  .project-card a {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.project-card h3 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.project-card p {
+    color: #e0e0e0;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.project-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.project-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.project-image:hover {
+    transform: scale(1.05);
+}
+
+.project-link {
+    display: inline-block;
+    background: #007bff;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin-top: auto;
+}
+
+.project-link:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.project-files {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #333;
+}
+
+.project-files h4 {
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.project-files ul {
+    list-style: none;
+    padding: 0;
+}
+
+.project-files li {
+    margin: 0.5rem 0;
+}
+
+.project-files a {
     color: #80cbc4;
     text-decoration: none;
-  }
-  
-  .project-card a:hover {
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.project-files a:hover {
+    color: #4db6ac;
     text-decoration: underline;
-  }
-  
-  footer {
+}
+
+footer {
     text-align: center;
-    padding: 1rem;
+    padding: 2rem;
     background: #1f1f1f;
-    color: white;
-  }
+    color: #ffffff;
+    margin-top: 4rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .project-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .project-gallery {
+        grid-template-columns: 1fr;
+    }
+    
+    section {
+        padding: 1rem;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        text-align: center;
+    }
+}
   

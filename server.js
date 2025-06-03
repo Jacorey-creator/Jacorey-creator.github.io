@@ -14,6 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -81,13 +82,13 @@ async function createInitialAdmin() {
         if (!adminExists) {
             const hashedPassword = await bcrypt.hash('jacorey721', 10);
             await User.create({
-                username: 'admin',
+                username: 'Afroman',
                 password: hashedPassword
             });
-            console.log('Initial admin user created');
+            console.log('Admin user created successfully');
         }
     } catch (error) {
-        console.error('Error creating initial admin:', error);
+        console.error('Error creating admin user:', error);
     }
 }
 
