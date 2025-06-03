@@ -77,9 +77,9 @@ const authenticateToken = (req, res, next) => {
 // Create initial admin user if none exists
 async function createInitialAdmin() {
     try {
-        const adminExists = await User.findOne({ username: 'admin' });
+        const adminExists = await User.findOne({ username: 'Afroman' });
         if (!adminExists) {
-            const hashedPassword = await bcrypt.hash('admin123', 10);
+            const hashedPassword = await bcrypt.hash('jacorey721', 10);
             await User.create({
                 username: 'admin',
                 password: hashedPassword
@@ -140,6 +140,37 @@ app.post('/api/projects', authenticateToken, upload.fields([
     } catch (error) {
         console.error('Error creating project:', error);
         res.status(500).json({ error: 'Error creating project' });
+    }
+});
+
+// Add delete endpoint
+app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        // Delete associated files
+        const deleteFile = (filePath) => {
+            const fullPath = path.join(__dirname, 'public', filePath);
+            if (fs.existsSync(fullPath)) {
+                fs.unlinkSync(fullPath);
+            }
+        };
+
+        // Delete project files
+        project.files.forEach(deleteFile);
+        project.images.forEach(deleteFile);
+
+        // Delete project from database
+        await Project.findByIdAndDelete(req.params.id);
+        
+        res.json({ message: 'Project deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        res.status(500).json({ error: 'Error deleting project' });
     }
 });
 
