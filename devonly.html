@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Interface - Rowe Bytes</title>
+    <link rel="stylesheet" href="Models/home_styling.css">
+    <style>
+        .dev-form {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            min-height: 150px;
+        }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .image-preview {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .submit-btn {
+            background: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1>Rowe Bytes - Developer Interface</h1>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <form class="dev-form" id="projectForm">
+            <div class="form-group">
+                <label for="projectName">Project Name:</label>
+                <input type="text" id="projectName" name="projectName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="projectFiles">Project Files:</label>
+                <input type="file" id="projectFiles" name="projectFiles" multiple>
+            </div>
+
+            <div class="form-group">
+                <label for="imageGallery">Image Gallery:</label>
+                <input type="file" id="imageGallery" name="imageGallery" multiple accept="image/*">
+                <div class="image-gallery" id="imagePreview"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="webLink">Web Link:</label>
+                <input type="url" id="webLink" name="webLink" placeholder="https://">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Add Project</button>
+        </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Jacorey Rowe. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Image preview functionality
+        document.getElementById('imageGallery').addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+            
+            for (const file of e.target.files) {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'image-preview';
+                        preview.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        // Form submission handling
+        document.getElementById('projectForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/projects', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                alert('Project added successfully!');
+                this.reset();
+                document.getElementById('imagePreview').innerHTML = '';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding project. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html> 
