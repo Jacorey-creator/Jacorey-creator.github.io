@@ -19,7 +19,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = 'public/uploads';
+        const uploadDir = path.join(__dirname, 'public/uploads');
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -182,6 +182,18 @@ app.get('/api/projects', async (req, res) => {
     } catch (error) {
         console.error('Error fetching projects:', error);
         res.status(500).json({ error: 'Error fetching projects' });
+    }
+});
+
+// Add a route to check if an image exists
+app.get('/uploads/:filename', (req, res, next) => {
+    const filename = req.params.filename;
+    const filepath = path.join(__dirname, 'public/uploads', filename);
+    
+    if (fs.existsSync(filepath)) {
+        res.sendFile(filepath);
+    } else {
+        res.status(404).send('Image not found');
     }
 });
 
