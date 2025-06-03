@@ -17,47 +17,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// Function to migrate old image paths to new ones
-async function migrateImagePaths() {
-    try {
-        const projects = await Project.find();
-        for (const project of projects) {
-            let needsUpdate = false;
-            
-            // Update image paths
-            project.images = project.images.map(imagePath => {
-                if (imagePath.startsWith('/uploads/') || imagePath.startsWith('/images/')) {
-                    needsUpdate = true;
-                    // Remove leading slash and 'uploads/' or 'images/' prefix
-                    return imagePath.replace(/^\/uploads\//, '').replace(/^\/images\//, '');
-                }
-                return imagePath;
-            });
-            
-            // Update file paths
-            project.files = project.files.map(filePath => {
-                if (filePath.startsWith('/uploads/') || filePath.startsWith('/images/')) {
-                    needsUpdate = true;
-                    // Remove leading slash and 'uploads/' or 'images/' prefix
-                    return filePath.replace(/^\/uploads\//, '').replace(/^\/images\//, '');
-                }
-                return filePath;
-            });
-            
-            if (needsUpdate) {
-                await project.save();
-                console.log(`Updated paths for project: ${project.name}`);
-            }
-        }
-        console.log('Image path migration completed');
-    } catch (error) {
-        console.error('Error migrating image paths:', error);
-    }
-}
-
-// Call migration function when server starts
-migrateImagePaths();
-
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -105,6 +64,68 @@ const projectSchema = new mongoose.Schema({
 });
 
 const Project = mongoose.model('Project', projectSchema);
+
+// Function to migrate old image paths to new ones
+async function migrateImagePaths() {
+    try {
+        console.log('Starting image path migration...');
+        const projects = await Project.find();
+        console.log(`Found ${projects.length} projects to migrate`);
+        
+        for (const project of projects) {
+            console.log(`Processing project: ${project.name}`);
+            let needsUpdate = false;
+            
+            // Update image paths
+            project.images = project.images.map(imagePath => {
+                console.log(`Processing image path: ${imagePath}`);
+                if (imagePath.startsWith('/uploads/') || imagePath.startsWith('/images/')) {
+                    needsUpdate = true;
+                    const newPath = imagePath.replace(/^\/uploads\//, '').replace(/^\/images\//, '');
+                    console.log(`Updated image path from ${imagePath} to ${newPath}`);
+                    return newPath;
+                }
+                return imagePath;
+            });
+            
+            // Update file paths
+            project.files = project.files.map(filePath => {
+                console.log(`Processing file path: ${filePath}`);
+                if (filePath.startsWith('/uploads/') || filePath.startsWith('/images/')) {
+                    needsUpdate = true;
+                    const newPath = filePath.replace(/^\/uploads\//, '').replace(/^\/images\//, '');
+                    console.log(`Updated file path from ${filePath} to ${newPath}`);
+                    return newPath;
+                }
+                return filePath;
+            });
+            
+            if (needsUpdate) {
+                try {
+                    await project.save();
+                    console.log(`Successfully updated paths for project: ${project.name}`);
+                } catch (saveError) {
+                    console.error(`Error saving project ${project.name}:`, saveError);
+                }
+            } else {
+                console.log(`No path updates needed for project: ${project.name}`);
+            }
+        }
+        console.log('Image path migration completed successfully');
+    } catch (error) {
+        console.error('Error during image path migration:', error);
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+    }
+}
+
+// Call migration function when server starts
+migrateImagePaths().catch(error => {
+    console.error('Migration failed:', error);
+});
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {

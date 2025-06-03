@@ -108,15 +108,22 @@
         return path.replace(/^\//, '');
     }
 
+    // Function to get the API URL based on environment
+    function getApiUrl() {
+        // Check if we're on GitHub Pages
+        if (window.location.hostname === 'jacorey-creator.github.io') {
+            // For now, we'll use localhost in development
+            // TODO: Replace with your actual production backend URL when deployed
+            return 'http://localhost:3000/api/projects';
+        }
+        // Local development
+        return 'http://localhost:3000/api/projects';
+    }
+
     // Fetch and display projects
     async function loadProjects() {
         try {
-            // Use relative path for API endpoint when on GitHub Pages
-            const apiUrl = window.location.hostname === 'jacorey-creator.github.io' 
-                ? 'https://your-backend-url.com/api/projects'  // Replace with your actual backend URL
-                : 'http://localhost:3000/api/projects';
-            
-            const response = await fetch(apiUrl);
+            const response = await fetch(getApiUrl());
             const projects = await response.json();
             
             const projectList = document.getElementById('projectList');
