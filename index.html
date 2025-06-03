@@ -5,6 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rowe Bytes</title>
   <link rel="stylesheet" href="Models\home_styling.css" />
+  <style>
+    .project-card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .project-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .project-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .project-link {
+      display: inline-block;
+      background: #007bff;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      margin: 1rem 0;
+    }
+    .project-link:hover {
+      background: #0056b3;
+    }
+    .project-files {
+      margin-top: 1rem;
+    }
+    .project-files ul {
+      list-style: none;
+      padding: 0;
+    }
+    .project-files li {
+      margin: 0.5rem 0;
+    }
+    .project-files a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .project-files a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -46,7 +96,6 @@
     <p>&copy; 2025 Jacorey Rowe. All rights reserved.</p>
   </footer>
 
-  <script src="controllers\home_controller.js"></script>
   <script>
     // Fetch and display projects
     async function loadProjects() {
