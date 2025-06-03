@@ -97,43 +97,57 @@
   </footer>
 
   <script>
+    // Function to get the correct image URL
+    function getImageUrl(path) {
+        // If the path is already a full URL, return it
+        if (path.startsWith('http')) {
+            return path;
+        }
+        // If the path starts with /images or /uploads, use the local server
+        if (path.startsWith('/images') || path.startsWith('/uploads')) {
+            return `http://localhost:3000${path}`;
+        }
+        // Otherwise, assume it's a relative path
+        return path;
+    }
+
     // Fetch and display projects
     async function loadProjects() {
-      try {
-        const response = await fetch('http://localhost:3000/api/projects');
-        const projects = await response.json();
-        
-        const projectList = document.getElementById('projectList');
-        projectList.innerHTML = projects.map(project => `
-          <div class="project-card">
-            <h3>${project.name}</h3>
-            ${project.images.length > 0 ? `
-              <div class="project-gallery">
-                ${project.images.map(image => `
-                  <img src="${image}" alt="${project.name}" class="project-image">
-                `).join('')}
-              </div>
-            ` : ''}
-            <p>${project.description}</p>
-            ${project.webLink ? `
-              <a href="${project.webLink}" target="_blank" class="project-link">View Project</a>
-            ` : ''}
-            ${project.files.length > 0 ? `
-              <div class="project-files">
-                <h4>Files:</h4>
-                <ul>
-                  ${project.files.map(file => `
-                    <li><a href="${file}" target="_blank">${file.split('/').pop()}</a></li>
-                  `).join('')}
-                </ul>
-              </div>
-            ` : ''}
-          </div>
-        `).join('');
-      } catch (error) {
-        console.error('Error loading projects:', error);
-        document.getElementById('projectList').innerHTML = '<p>Error loading projects. Please try again later.</p>';
-      }
+        try {
+            const response = await fetch('http://localhost:3000/api/projects');
+            const projects = await response.json();
+            
+            const projectList = document.getElementById('projectList');
+            projectList.innerHTML = projects.map(project => `
+                <div class="project-card">
+                    <h3>${project.name}</h3>
+                    ${project.images.length > 0 ? `
+                        <div class="project-gallery">
+                            ${project.images.map(image => `
+                                <img src="${getImageUrl(image)}" alt="${project.name}" class="project-image">
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    <p>${project.description}</p>
+                    ${project.webLink ? `
+                        <a href="${project.webLink}" target="_blank" class="project-link">View Project</a>
+                    ` : ''}
+                    ${project.files.length > 0 ? `
+                        <div class="project-files">
+                            <h4>Files:</h4>
+                            <ul>
+                                ${project.files.map(file => `
+                                    <li><a href="${getImageUrl(file)}" target="_blank">${file.split('/').pop()}</a></li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error('Error loading projects:', error);
+            document.getElementById('projectList').innerHTML = '<p>Error loading projects. Please try again later.</p>';
+        }
     }
 
     // Load projects when the page loads

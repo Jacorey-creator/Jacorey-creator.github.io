@@ -14,12 +14,52 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
+// Function to migrate old image paths to new ones
+async function migrateImagePaths() {
+    try {
+        const projects = await Project.find();
+        for (const project of projects) {
+            let needsUpdate = false;
+            
+            // Update image paths
+            project.images = project.images.map(imagePath => {
+                if (imagePath.startsWith('/uploads/')) {
+                    needsUpdate = true;
+                    return imagePath.replace('/uploads/', '/images/');
+                }
+                return imagePath;
+            });
+            
+            // Update file paths
+            project.files = project.files.map(filePath => {
+                if (filePath.startsWith('/uploads/')) {
+                    needsUpdate = true;
+                    return filePath.replace('/uploads/', '/images/');
+                }
+                return filePath;
+            });
+            
+            if (needsUpdate) {
+                await project.save();
+                console.log(`Updated paths for project: ${project.name}`);
+            }
+        }
+        console.log('Image path migration completed');
+    } catch (error) {
+        console.error('Error migrating image paths:', error);
+    }
+}
+
+// Call migration function when server starts
+migrateImagePaths();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        const uploadDir = path.join(__dirname, 'images');
         console.log('Upload directory:', uploadDir);
         
         // Create directory if it doesn't exist
@@ -134,8 +174,8 @@ app.post('/api/projects', authenticateToken, upload.fields([
         
         console.log('Received files:', req.files);
         
-        const files = req.files['projectFiles']?.map(file => `/uploads/${file.filename}`) || [];
-        const images = req.files['imageGallery']?.map(file => `/uploads/${file.filename}`) || [];
+        const files = req.files['projectFiles']?.map(file => `/images/${file.filename}`) || [];
+        const images = req.files['imageGallery']?.map(file => `/images/${file.filename}`) || [];
 
         console.log('Processed file paths:', files);
         console.log('Processed image paths:', images);
@@ -168,7 +208,7 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
 
         // Delete associated files
         const deleteFile = (filePath) => {
-            const fullPath = path.join(__dirname, 'public', filePath);
+            const fullPath = path.join(__dirname, 'images', filePath);
             if (fs.existsSync(fullPath)) {
                 fs.unlinkSync(fullPath);
             }
@@ -214,9 +254,9 @@ app.get('/api/debug/images', async (req, res) => {
 });
 
 // Add a route to check if an image exists
-app.get('/uploads/:filename', (req, res) => {
+app.get('/images/:filename', (req, res) => {
     const filename = req.params.filename;
-    const filepath = path.join(__dirname, 'public', 'uploads', filename);
+    const filepath = path.join(__dirname, 'images', filename);
     console.log('Attempting to serve image:', filepath);
     
     if (fs.existsSync(filepath)) {
@@ -224,6 +264,21 @@ app.get('/uploads/:filename', (req, res) => {
         res.sendFile(filepath);
     } else {
         console.log('Image not found:', filepath);
+        res.status(404).send('Image not found');
+    }
+});
+
+// Keep the old uploads route for backward compatibility
+app.get('/uploads/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const filepath = path.join(__dirname, 'public/uploads', filename);
+    console.log('Attempting to serve image from old path:', filepath);
+    
+    if (fs.existsSync(filepath)) {
+        console.log('Image found in old location, sending file');
+        res.sendFile(filepath);
+    } else {
+        console.log('Image not found in old location:', filepath);
         res.status(404).send('Image not found');
     }
 });
