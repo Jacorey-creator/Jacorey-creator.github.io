@@ -12,6 +12,11 @@
       padding: 1.5rem;
       margin-bottom: 2rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      color: #333;
+    }
+    .project-card h3 {
+      color: #1a1a1a;
+      margin-bottom: 1rem;
     }
     .project-gallery {
       display: grid;
@@ -53,6 +58,41 @@
     }
     .project-files a:hover {
       text-decoration: underline;
+    }
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
+      background: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+    }
+    .image-modal .modal-content {
+      margin: auto;
+      display: block;
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+    }
+    .close-modal {
+      position: absolute;
+      top: 30px;
+      right: 50px;
+      color: #fff;
+      font-size: 3rem;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10001;
+      transition: color 0.2s;
+    }
+    .close-modal:hover {
+      color: #80cbc4;
     }
   </style>
 </head>
@@ -160,6 +200,27 @@
 
     // Load projects when the page loads
     document.addEventListener('DOMContentLoaded', loadProjects);
+
+    // Modal functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('project-image')) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            modalImg.src = e.target.src;
+            modal.style.display = 'flex';
+        }
+        if (e.target.id === 'imageModal' || e.target.id === 'closeModal' || e.target === document.getElementById('modalImg')) {
+            const modal = document.getElementById('imageModal');
+            if (modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        }
+    });
   </script>
+  <!-- Image Modal -->
+  <div id="imageModal" class="image-modal" style="display:none;">
+    <span id="closeModal" class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImg" alt="Large Project Image">
+  </div>
 </body>
 </html>
