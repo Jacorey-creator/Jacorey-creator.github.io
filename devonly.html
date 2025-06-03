@@ -194,6 +194,28 @@
     </style>
 </head>
 <body>
+    <script>
+        // Check if user is logged in
+        const token = localStorage.getItem('devToken');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Add token to all fetch requests
+        const originalFetch = window.fetch;
+        window.fetch = function() {
+            let [resource, config] = arguments;
+            if (config === undefined) {
+                config = {};
+            }
+            if (config.headers === undefined) {
+                config.headers = {};
+            }
+            config.headers['Authorization'] = `Bearer ${token}`;
+            return originalFetch(resource, config);
+        };
+    </script>
+
     <header>
         <nav>
             <h1>Rowe Bytes - Developer Interface</h1>
@@ -202,6 +224,7 @@
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#projects">Projects</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
             </ul>
         </nav>
     </header>
@@ -243,6 +266,12 @@
     </footer>
 
     <script>
+        // Logout function
+        function logout() {
+            localStorage.removeItem('devToken');
+            window.location.href = 'login.html';
+        }
+
         // Image preview functionality
         document.getElementById('imageGallery').addEventListener('change', function(e) {
             const preview = document.getElementById('imagePreview');
