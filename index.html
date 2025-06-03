@@ -99,14 +99,13 @@
   <script>
     // Function to get the correct image URL
     function getImageUrl(path) {
-        // If the path is already a full URL, return it
-        if (path.startsWith('http')) {
-            return path;
-        }
-        // For GitHub Pages, we need to use relative paths
-        // Remove any leading slashes to make it relative to the current directory
-        return path.replace(/^\//, '');
+    // If the path is already a full URL, return it
+    if (path.startsWith('http')) {
+        return path;
     }
+    // For GitHub Pages, always use the images/ directory
+    return 'images/' + path.replace(/^.*[\\/]/, '');
+}
 
     // Function to get the API URL based on environment
     function getApiUrl() {
