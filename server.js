@@ -14,19 +14,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        const uploadDir = path.join(__dirname, 'public/uploads');
+        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        console.log('Upload directory:', uploadDir);
+        
+        // Create directory if it doesn't exist
         if (!fs.existsSync(uploadDir)) {
+            console.log('Creating upload directory...');
             fs.mkdirSync(uploadDir, { recursive: true });
         }
+        
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
+        const filename = Date.now() + '-' + file.originalname;
+        console.log('Saving file:', filename);
+        cb(null, filename);
     }
 });
 
@@ -125,11 +132,13 @@ app.post('/api/projects', authenticateToken, upload.fields([
     try {
         const { projectName, description, webLink } = req.body;
         
+        console.log('Received files:', req.files);
+        
         const files = req.files['projectFiles']?.map(file => `/uploads/${file.filename}`) || [];
         const images = req.files['imageGallery']?.map(file => `/uploads/${file.filename}`) || [];
 
-        console.log('Uploaded files:', req.files);
-        console.log('Image paths:', images);
+        console.log('Processed file paths:', files);
+        console.log('Processed image paths:', images);
 
         const project = new Project({
             name: projectName,
@@ -207,10 +216,11 @@ app.get('/api/debug/images', async (req, res) => {
 // Add a route to check if an image exists
 app.get('/uploads/:filename', (req, res) => {
     const filename = req.params.filename;
-    const filepath = path.join(__dirname, 'public/uploads', filename);
+    const filepath = path.join(__dirname, 'public', 'uploads', filename);
     console.log('Attempting to serve image:', filepath);
     
     if (fs.existsSync(filepath)) {
+        console.log('Image found, sending file');
         res.sendFile(filepath);
     } else {
         console.log('Image not found:', filepath);
