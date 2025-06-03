@@ -2,7 +2,7 @@ This is my personal portfolio website, built to showcase my projects, skills, an
 
 🚀 Live Demo
 👉 View Live Site
-(Replace with your actual GitHub Pages link.)
+[(https://jacorey-creator.github.io/)
 
 🛠️ Tech Stack
 Frontend:
