@@ -103,18 +103,20 @@
         if (path.startsWith('http')) {
             return path;
         }
-        // If the path starts with /images or /uploads, use the local server
-        if (path.startsWith('/images') || path.startsWith('/uploads')) {
-            return `http://localhost:3000${path}`;
-        }
-        // Otherwise, assume it's a relative path
-        return path;
+        // For GitHub Pages, we need to use relative paths
+        // Remove any leading slashes to make it relative to the current directory
+        return path.replace(/^\//, '');
     }
 
     // Fetch and display projects
     async function loadProjects() {
         try {
-            const response = await fetch('http://localhost:3000/api/projects');
+            // Use relative path for API endpoint when on GitHub Pages
+            const apiUrl = window.location.hostname === 'jacorey-creator.github.io' 
+                ? 'https://your-backend-url.com/api/projects'  // Replace with your actual backend URL
+                : 'http://localhost:3000/api/projects';
+            
+            const response = await fetch(apiUrl);
             const projects = await response.json();
             
             const projectList = document.getElementById('projectList');

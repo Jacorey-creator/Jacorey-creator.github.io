@@ -26,18 +26,20 @@ async function migrateImagePaths() {
             
             // Update image paths
             project.images = project.images.map(imagePath => {
-                if (imagePath.startsWith('/uploads/')) {
+                if (imagePath.startsWith('/uploads/') || imagePath.startsWith('/images/')) {
                     needsUpdate = true;
-                    return imagePath.replace('/uploads/', '/images/');
+                    // Remove leading slash and 'uploads/' or 'images/' prefix
+                    return imagePath.replace(/^\/uploads\//, '').replace(/^\/images\//, '');
                 }
                 return imagePath;
             });
             
             // Update file paths
             project.files = project.files.map(filePath => {
-                if (filePath.startsWith('/uploads/')) {
+                if (filePath.startsWith('/uploads/') || filePath.startsWith('/images/')) {
                     needsUpdate = true;
-                    return filePath.replace('/uploads/', '/images/');
+                    // Remove leading slash and 'uploads/' or 'images/' prefix
+                    return filePath.replace(/^\/uploads\//, '').replace(/^\/images\//, '');
                 }
                 return filePath;
             });
@@ -174,8 +176,9 @@ app.post('/api/projects', authenticateToken, upload.fields([
         
         console.log('Received files:', req.files);
         
-        const files = req.files['projectFiles']?.map(file => `/images/${file.filename}`) || [];
-        const images = req.files['imageGallery']?.map(file => `/images/${file.filename}`) || [];
+        // Save files with paths relative to the repository root
+        const files = req.files['projectFiles']?.map(file => `images/${file.filename}`) || [];
+        const images = req.files['imageGallery']?.map(file => `images/${file.filename}`) || [];
 
         console.log('Processed file paths:', files);
         console.log('Processed image paths:', images);
