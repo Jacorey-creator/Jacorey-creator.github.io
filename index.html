@@ -595,24 +595,27 @@
           const cells = [
             { 
               text: project.name.length > 12 ? project.name.substring(0, 12) + '...' : project.name,
-              size: 32,
+              size: 36,
               color: '#ffffff',
               background: 'rgba(0, 0, 0, 0.3)',
-              padding: 10
+              padding: 15,
+              yOffset: -20
             },
             { 
               text: project.description.substring(0, 50) + '...',
-              size: 18,
+              size: 20,
               color: '#e0e0e0',
               background: 'rgba(0, 0, 0, 0.2)',
-              padding: 8
+              padding: 10,
+              yOffset: 0
             },
             { 
               text: 'Click to view',
-              size: 20,
+              size: 28,
               color: '#80cbc4',
               background: 'rgba(0, 0, 0, 0.2)',
-              padding: 8
+              padding: 10,
+              yOffset: 20
             }
           ];
           
@@ -631,13 +634,16 @@
             
             // For title (first cell), just draw the truncated text
             if (i === 0) {
-              ctx.fillText(cell.text, cellSize / 2, y + (cellSize / 2));
+              ctx.fillText(cell.text, cellSize / 2, y + (cellSize / 2) + cell.yOffset);
+            } else if (i === 2) {
+              // For "Click to view", draw it centered
+              ctx.fillText(cell.text, cellSize / 2, y + (cellSize / 2) + cell.yOffset);
             } else {
-              // Word wrap for description and "Click to view"
+              // Word wrap for description
               const words = cell.text.split(' ');
               let line = '';
               let lineHeight = cell.size * 1.2;
-              let yPos = y + (cellSize / 2) - ((words.length > 1 ? words.length - 1 : 0) * lineHeight / 2);
+              let yPos = y + (cellSize / 2) - ((words.length > 1 ? words.length - 1 : 0) * lineHeight / 2) + cell.yOffset;
               
               for (let word of words) {
                 const testLine = line + word + ' ';
