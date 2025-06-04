@@ -271,6 +271,8 @@
       border-radius: 20px;
       padding: 2rem;
       box-shadow: var(--glass-shadow);
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     #cube-canvas {
@@ -332,6 +334,7 @@
       padding: 2rem;
       width: 100%;
       flex-wrap: wrap;
+      position: relative;
     }
 
     footer {
@@ -758,7 +761,8 @@
       // Adjust container widths and positions
       projectsContainer.style.justifyContent = 'flex-start';
       cubeContainer.style.width = '40%';
-      cubeContainer.style.margin = '0';
+      cubeContainer.style.left = '0';
+      cubeContainer.style.transform = 'none';
       additionalProjects.style.width = '55%';
     }
 
@@ -777,8 +781,9 @@
           
           // Restore original container layout
           projectsContainer.style.justifyContent = 'center';
-          cubeContainer.style.width = '50%';
-          cubeContainer.style.margin = '0 auto';
+          cubeContainer.style.width = '500px';
+          cubeContainer.style.left = '50%';
+          cubeContainer.style.transform = 'translateX(-50%)';
           additionalProjects.style.width = '45%';
           
           // Reset current project index
