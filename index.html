@@ -902,109 +902,96 @@
           canvas.width = 512;
           canvas.height = 512;
           
-          // Draw 3x3 grid
-          const gridSize = 3;
-          const cellSize = canvas.width / gridSize;
-          
-          // Fill background with a gradient
-          const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-          gradient.addColorStop(0, '#2c3e50');
-          gradient.addColorStop(1, '#34495e');
+          // Create a modern gradient background
+          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+          gradient.addColorStop(0, '#1a1a1a');
+          gradient.addColorStop(1, '#2d2d2d');
           ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Draw grid lines
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-          ctx.lineWidth = 2;
-          
-          for (let i = 1; i < gridSize; i++) {
-            // Vertical lines
-            ctx.beginPath();
-            ctx.moveTo(i * cellSize, 0);
-            ctx.lineTo(i * cellSize, canvas.height);
-            ctx.stroke();
-            
-            // Horizontal lines
-            ctx.beginPath();
-            ctx.moveTo(0, i * cellSize);
-            ctx.lineTo(canvas.width, i * cellSize);
-            ctx.stroke();
+          // Add subtle pattern overlay
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+          for (let i = 0; i < canvas.width; i += 20) {
+            for (let j = 0; j < canvas.height; j += 20) {
+              if ((i + j) % 40 === 0) {
+                ctx.fillRect(i, j, 10, 10);
+              }
+            }
           }
           
-          // Draw project content in each cell
-          const cells = [
-            { 
-              text: project.name.length > 12 ? project.name.substring(0, 12) + '...' : project.name,
-              size: 36,
-              color: '#ffffff',
-              background: 'rgba(0, 0, 0, 0.3)',
-              padding: 15,
-              yOffset: -20
-            },
-            { 
-              text: project.description.substring(0, 50) + '...',
-              size: 20,
-              color: '#e0e0e0',
-              background: 'rgba(0, 0, 0, 0.2)',
-              padding: 10,
-              yOffset: 0
-            },
-            { 
-              text: 'Click to view',
-              size: 28,
-              color: '#80cbc4',
-              background: 'rgba(0, 0, 0, 0.2)',
-              padding: 10,
-              yOffset: 20
-            }
-          ];
+          // Draw decorative border
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
           
-          cells.forEach((cell, i) => {
-            const y = i * cellSize;
-            
-            // Draw cell background
-            ctx.fillStyle = cell.background;
-            ctx.fillRect(0, y, cellSize, cellSize);
-            
-            // Draw text
-            ctx.font = `bold ${cell.size}px Arial`;
-            ctx.fillStyle = cell.color;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // For title (first cell), just draw the truncated text
-            if (i === 0) {
-              ctx.fillText(cell.text, cellSize / 2, y + (cellSize / 2) + cell.yOffset);
-            } else if (i === 2) {
-              // For "Click to view", draw it centered
-              ctx.fillText(cell.text, cellSize / 2, y + (cellSize / 2) + cell.yOffset);
-            } else {
-              // Word wrap for description
-              const words = cell.text.split(' ');
-              let line = '';
-              let lineHeight = cell.size * 1.2;
-              let yPos = y + (cellSize / 2) - ((words.length > 1 ? words.length - 1 : 0) * lineHeight / 2) + cell.yOffset;
-              
-              for (let word of words) {
-                const testLine = line + word + ' ';
-                const metrics = ctx.measureText(testLine);
-                
-                if (metrics.width > cellSize - (cell.padding * 2) && line !== '') {
-                  ctx.fillText(line, cellSize / 2, yPos);
-                  line = word + ' ';
-                  yPos += lineHeight;
-                } else {
-                  line = testLine;
-                }
-              }
-              ctx.fillText(line, cellSize / 2, yPos);
-            }
+          // Add inner border with gradient
+          const borderGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          borderGradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+          borderGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+          borderGradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+          ctx.strokeStyle = borderGradient;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+          
+          // Project title section
+          const titleHeight = 120;
+          const titleGradient = ctx.createLinearGradient(0, 0, 0, titleHeight);
+          titleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+          titleGradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+          ctx.fillStyle = titleGradient;
+          ctx.fillRect(30, 30, canvas.width - 60, titleHeight);
+          
+          // Draw project title
+          ctx.font = 'bold 36px Arial';
+          ctx.fillStyle = '#ffffff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          // Truncate and wrap title if needed
+          const title = project.name.length > 20 ? project.name.substring(0, 20) + '...' : project.name;
+          const titleLines = wrapText(ctx, title, canvas.width - 80, 36);
+          titleLines.forEach((line, i) => {
+            ctx.fillText(line, canvas.width / 2, 60 + (i * 40));
           });
           
-          // Add subtle border to the entire face
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-          ctx.lineWidth = 4;
-          ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+          // Description section
+          const descY = 170;
+          const descHeight = 200;
+          const descGradient = ctx.createLinearGradient(0, descY, 0, descY + descHeight);
+          descGradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+          descGradient.addColorStop(1, 'rgba(255, 255, 255, 0.02)');
+          ctx.fillStyle = descGradient;
+          ctx.fillRect(30, descY, canvas.width - 60, descHeight);
+          
+          // Draw description
+          ctx.font = '20px Arial';
+          ctx.fillStyle = '#cccccc';
+          const description = project.description.substring(0, 150) + '...';
+          const descLines = wrapText(ctx, description, canvas.width - 80, 20);
+          descLines.forEach((line, i) => {
+            ctx.fillText(line, canvas.width / 2, descY + 30 + (i * 25));
+          });
+          
+          // Footer section with "Click to view"
+          const footerY = canvas.height - 80;
+          const footerGradient = ctx.createLinearGradient(0, footerY, 0, canvas.height);
+          footerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
+          footerGradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+          ctx.fillStyle = footerGradient;
+          ctx.fillRect(30, footerY, canvas.width - 60, 50);
+          
+          // Draw "Click to view" text
+          ctx.font = 'bold 24px Arial';
+          ctx.fillStyle = '#80cbc4';
+          ctx.fillText('Click to view', canvas.width / 2, footerY + 25);
+          
+          // Add subtle shine effect
+          const shineGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          shineGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+          shineGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+          shineGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = shineGradient;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           // Create texture from canvas
           const texture = new THREE.CanvasTexture(canvas);
@@ -1012,6 +999,26 @@
           material.needsUpdate = true;
         }
       });
+    }
+
+    // Helper function to wrap text
+    function wrapText(ctx, text, maxWidth, fontSize) {
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + ' ' + word).width;
+        if (width < maxWidth) {
+          currentLine += ' ' + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      return lines;
     }
 
     function rotateCube(direction) {
