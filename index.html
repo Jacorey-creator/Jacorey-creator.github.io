@@ -716,6 +716,10 @@
     function showProjectDetail(project) {
       const overlay = document.getElementById('projectOverlay');
       const detailView = document.createElement('div');
+      const projectsContainer = document.getElementById('projects-container');
+      const cubeContainer = document.getElementById('cube-container');
+      const additionalProjects = document.getElementById('additional-projects');
+      
       detailView.className = 'project-detail-view';
       detailView.innerHTML = `
         <button class="close-btn" onclick="closeProjectDetail()">&times;</button>
@@ -751,14 +755,19 @@
         detailView.classList.add('active');
       }, 50);
       
-      // Shrink cube container
-      document.getElementById('cube-container').style.width = '40%';
-      document.getElementById('additional-projects').style.width = '55%';
+      // Adjust container widths and positions
+      projectsContainer.style.justifyContent = 'flex-start';
+      cubeContainer.style.width = '40%';
+      cubeContainer.style.margin = '0';
+      additionalProjects.style.width = '55%';
     }
 
     function closeProjectDetail() {
       const overlay = document.getElementById('projectOverlay');
       const detailView = overlay.querySelector('.project-detail-view');
+      const projectsContainer = document.getElementById('projects-container');
+      const cubeContainer = document.getElementById('cube-container');
+      const additionalProjects = document.getElementById('additional-projects');
       
       if (detailView) {
         detailView.classList.remove('active');
@@ -766,9 +775,11 @@
           overlay.innerHTML = '';
           overlay.style.display = 'none';
           
-          // Restore original sizes
-          document.getElementById('cube-container').style.width = '50%';
-          document.getElementById('additional-projects').style.width = '45%';
+          // Restore original container layout
+          projectsContainer.style.justifyContent = 'center';
+          cubeContainer.style.width = '50%';
+          cubeContainer.style.margin = '0 auto';
+          additionalProjects.style.width = '45%';
           
           // Reset current project index
           currentProjectIndex = -1;
