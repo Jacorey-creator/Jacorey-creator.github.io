@@ -869,11 +869,11 @@
       const intersects = raycaster.intersectObject(cube);
       
       if (intersects.length > 0) {
-        const faceIndex = Math.floor(intersects[0].faceIndex / 6);
-        const projectIndex = faceIndex;
+        // Get the actual face index (0-5 for the six faces)
+        const faceIndex = Math.floor(intersects[0].faceIndex / 2);
         
         // If clicking the same face that's already open, do nothing
-        if (projectIndex === currentProjectIndex) {
+        if (faceIndex === currentProjectIndex) {
           return;
         }
         
@@ -882,9 +882,9 @@
           closeProjectDetail();
         }
         
-        if (projects[projectIndex]) {
-          currentProjectIndex = projectIndex;
-          showProjectDetail(projects[projectIndex]);
+        if (projects[faceIndex]) {
+          currentProjectIndex = faceIndex;
+          showProjectDetail(projects[faceIndex]);
         }
       }
     }
@@ -904,7 +904,8 @@
       const canvas = document.getElementById('cube-canvas');
       
       if (intersects.length > 0) {
-        const faceIndex = Math.floor(intersects[0].faceIndex / 6);
+        // Get the actual face index (0-5 for the six faces)
+        const faceIndex = Math.floor(intersects[0].faceIndex / 2);
         if (projects[faceIndex]) {
           canvas.style.cursor = 'pointer';
           // Add subtle highlight effect to the face
@@ -1005,7 +1006,7 @@
 
     function updateCubeFaces() {
       projects.forEach((project, index) => {
-        if (index < 6) {
+        if (index < 6) { // Only update the first 6 projects for the cube faces
           const material = cube.material[index];
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
