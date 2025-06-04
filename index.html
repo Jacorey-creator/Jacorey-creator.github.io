@@ -106,7 +106,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: rgba(0, 0, 0, 0.05); /* Temporary background to see container bounds */
+      background: rgba(0, 0, 0, 0.05);
     }
     
     #projects {
@@ -136,8 +136,7 @@
     
     #cube-canvas {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
@@ -437,6 +436,7 @@
         antialias: true 
       });
       renderer.setSize(width, height);
+      renderer.setPixelRatio(window.devicePixelRatio);
       
       // Create cube geometry with 3x3x3 segments
       const geometry = new THREE.BoxGeometry(2, 2, 2, 3, 3, 3);
@@ -457,6 +457,9 @@
       
       // Position camera to show cube properly
       camera.position.z = 4;
+      
+      // Center the cube in the scene
+      cube.position.set(0, 0, 0);
       
       // Add ambient light
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
