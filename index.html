@@ -100,7 +100,7 @@
       height: 600px;
       position: relative;
       perspective: 1000px;
-      transition: width 0.5s ease;
+      transition: all 0.5s ease;
     }
     
     #projects-container {
@@ -212,6 +212,106 @@
       background: #0056b3;
       transform: translateY(-2px);
     }
+    
+    .cube-face-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      backface-visibility: hidden;
+    }
+    
+    .cube-face-square {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      text-align: center;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .cube-face-square:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+    
+    .cube-face-square.fade-out {
+      opacity: 0;
+    }
+    
+    .cube-face-square.fade-in {
+      opacity: 1;
+    }
+    
+    .project-detail-view {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 80%;
+      max-width: 800px;
+      background: #1e1e1e;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
+    
+    .project-detail-view.active {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    
+    .project-detail-view h3 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #ffffff;
+    }
+    
+    .project-detail-view p {
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      margin-bottom: 2rem;
+    }
+    
+    .project-detail-view .project-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .project-detail-view .project-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    
+    .project-detail-view .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    
+    .project-detail-view .close-btn:hover {
+      color: #80cbc4;
+    }
   </style>
 </head>
 <body>
@@ -301,8 +401,8 @@
       renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cube-canvas'), antialias: true });
       renderer.setSize(document.getElementById('cube-container').offsetWidth, document.getElementById('cube-container').offsetHeight);
       
-      // Create cube geometry
-      const geometry = new THREE.BoxGeometry(2, 2, 2);
+      // Create cube geometry with 3x3x3 segments
+      const geometry = new THREE.BoxGeometry(2, 2, 2, 3, 3, 3);
       const materials = [];
       
       // Create materials for each face
@@ -329,6 +429,10 @@
       directionalLight.position.set(0, 1, 1);
       scene.add(directionalLight);
       
+      // Add click event listener to canvas
+      const canvas = document.getElementById('cube-canvas');
+      canvas.addEventListener('click', onCubeClick);
+      
       animate();
     }
 
@@ -337,23 +441,140 @@
       renderer.render(scene, camera);
     }
 
+    function onCubeClick(event) {
+      const rect = event.target.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2(x, y);
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(cube);
+      
+      if (intersects.length > 0) {
+        const faceIndex = Math.floor(intersects[0].faceIndex / 6);
+        const projectIndex = faceIndex;
+        
+        if (projects[projectIndex]) {
+          showProjectDetail(projects[projectIndex]);
+        }
+      }
+    }
+
+    function showProjectDetail(project) {
+      const overlay = document.getElementById('projectOverlay');
+      const detailView = document.createElement('div');
+      detailView.className = 'project-detail-view';
+      detailView.innerHTML = `
+        <button class="close-btn" onclick="closeProjectDetail()">&times;</button>
+        <h3>${project.name}</h3>
+        ${project.images.length > 0 ? `
+          <div class="project-gallery">
+            ${project.images.map(image => `
+              <img src="${getImageUrl(image)}" alt="${project.name}" class="project-image">
+            `).join('')}
+          </div>
+        ` : ''}
+        <p>${project.description}</p>
+        ${project.webLink ? `
+          <a href="${project.webLink}" target="_blank" class="project-link">View Project</a>
+        ` : ''}
+        ${project.files.length > 0 ? `
+          <div class="project-files">
+            <h4>Files:</h4>
+            <ul>
+              ${project.files.map(file => `
+                <li><a href="${getImageUrl(file)}" target="_blank">${file.split('/').pop()}</a></li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      `;
+      
+      overlay.appendChild(detailView);
+      overlay.style.display = 'block';
+      
+      // Trigger the transition effect
+      setTimeout(() => {
+        detailView.classList.add('active');
+      }, 50);
+      
+      // Shrink cube container
+      document.getElementById('cube-container').style.width = '40%';
+      document.getElementById('additional-projects').style.width = '55%';
+    }
+
+    function closeProjectDetail() {
+      const overlay = document.getElementById('projectOverlay');
+      const detailView = overlay.querySelector('.project-detail-view');
+      
+      if (detailView) {
+        detailView.classList.remove('active');
+        setTimeout(() => {
+          overlay.innerHTML = '';
+          overlay.style.display = 'none';
+          
+          // Restore original sizes
+          document.getElementById('cube-container').style.width = '60%';
+          document.getElementById('additional-projects').style.width = '35%';
+        }, 500);
+      }
+    }
+
     function updateCubeFaces() {
       projects.forEach((project, index) => {
-        if (index < 6) { // Only use first 6 projects for cube faces
+        if (index < 6) {
           const material = cube.material[index];
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           canvas.width = 512;
           canvas.height = 512;
           
-          // Draw project content on canvas
+          // Draw 3x3 grid
+          const gridSize = 3;
+          const cellSize = canvas.width / gridSize;
+          
+          // Fill background
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw grid lines
+          ctx.strokeStyle = '#000000';
+          ctx.lineWidth = 2;
+          
+          for (let i = 1; i < gridSize; i++) {
+            // Vertical lines
+            ctx.beginPath();
+            ctx.moveTo(i * cellSize, 0);
+            ctx.lineTo(i * cellSize, canvas.height);
+            ctx.stroke();
+            
+            // Horizontal lines
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellSize);
+            ctx.lineTo(canvas.width, i * cellSize);
+            ctx.stroke();
+          }
+          
+          // Draw project content in each cell
           ctx.fillStyle = '#000000';
-          ctx.font = '24px Arial';
-          ctx.fillText(project.name, 20, 40);
           ctx.font = '16px Arial';
-          ctx.fillText(project.description.substring(0, 100) + '...', 20, 80);
+          
+          const cells = [
+            { text: project.name, size: 24 },
+            { text: project.description.substring(0, 50) + '...', size: 16 },
+            { text: 'Click to view', size: 16 }
+          ];
+          
+          cells.forEach((cell, i) => {
+            ctx.font = `${cell.size}px Arial`;
+            const text = cell.text;
+            const textWidth = ctx.measureText(text).width;
+            const x = (cellSize - textWidth) / 2;
+            const y = (i + 1) * cellSize - (cellSize - cell.size) / 2;
+            ctx.fillText(text, x, y);
+          });
           
           // Create texture from canvas
           const texture = new THREE.CanvasTexture(canvas);
