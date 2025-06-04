@@ -560,13 +560,17 @@
   <script>
     // Function to get the correct image URL
     function getImageUrl(path) {
-    // If the path is already a full URL, return it
-    if (path.startsWith('http')) {
-        return path;
+        // If the path is already a full URL, return it
+        if (path.startsWith('http')) {
+            return path;
+        }
+        // If the path already includes 'images/', return it as is
+        if (path.startsWith('images/')) {
+            return path;
+        }
+        // Otherwise, add the images/ prefix
+        return 'images/' + path.replace(/^.*[\\/]/, '');
     }
-    // For GitHub Pages, always use the images/ directory
-    return 'images/' + path.replace(/^.*[\\/]/, '');
-}
 
     // Function to get the API URL based on environment
     function getApiUrl() {
