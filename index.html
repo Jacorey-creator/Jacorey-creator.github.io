@@ -1070,73 +1070,138 @@
           ctx.strokeStyle = borderGradient;
           ctx.lineWidth = 2;
           ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-          
-          // Project title section
-          const titleHeight = 120;
-          const titleGradient = ctx.createLinearGradient(0, 0, 0, titleHeight);
-          titleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
-          titleGradient.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
-          ctx.fillStyle = titleGradient;
-          ctx.fillRect(30, 30, canvas.width - 60, titleHeight);
-          
-          // Draw project title
-          ctx.font = 'bold 36px Arial';
-          ctx.fillStyle = '#ffffff';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          
-          // Truncate and wrap title if needed
-          const title = project.name.length > 20 ? project.name.substring(0, 20) + '...' : project.name;
-          const titleLines = wrapText(ctx, title, canvas.width - 80, 36);
-          titleLines.forEach((line, i) => {
-            ctx.fillText(line, canvas.width / 2, 60 + (i * 40));
-          });
-          
-          // Description section
-          const descY = 170;
-          const descHeight = 200;
-          const descGradient = ctx.createLinearGradient(0, descY, 0, descY + descHeight);
-          descGradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
-          descGradient.addColorStop(1, 'rgba(255, 255, 255, 0.02)');
-          ctx.fillStyle = descGradient;
-          ctx.fillRect(30, descY, canvas.width - 60, descHeight);
-          
-          // Draw description
-          ctx.font = '20px Arial';
-          ctx.fillStyle = '#cccccc';
-          const description = project.description.substring(0, 150) + '...';
-          const descLines = wrapText(ctx, description, canvas.width - 80, 20);
-          descLines.forEach((line, i) => {
-            ctx.fillText(line, canvas.width / 2, descY + 30 + (i * 25));
-          });
-          
-          // Footer section with "Click to view"
-          const footerY = canvas.height - 80;
-          const footerGradient = ctx.createLinearGradient(0, footerY, 0, canvas.height);
-          footerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.05)');
-          footerGradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
-          ctx.fillStyle = footerGradient;
-          ctx.fillRect(30, footerY, canvas.width - 60, 50);
-          
-          // Draw "Click to view" text
-          ctx.font = 'bold 24px Arial';
-          ctx.fillStyle = '#80cbc4';
-          ctx.fillText('Click to view', canvas.width / 2, footerY + 25);
-          
-          // Add subtle shine effect
-          const shineGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-          shineGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-          shineGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
-          shineGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-          ctx.fillStyle = shineGradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Create texture from canvas
-          const texture = new THREE.CanvasTexture(canvas);
-          material.map = texture;
-          material.needsUpdate = true;
+
+          // Load and draw project image if available
+          if (project.images && project.images.length > 0) {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = function() {
+              // Calculate image dimensions to maintain aspect ratio
+              const imgWidth = canvas.width - 80;
+              const imgHeight = 200;
+              const scale = Math.min(imgWidth / img.width, imgHeight / img.height);
+              const scaledWidth = img.width * scale;
+              const scaledHeight = img.height * scale;
+              
+              // Draw image with rounded corners
+              const x = (canvas.width - scaledWidth) / 2;
+              const y = 40;
+              const radius = 10;
+              
+              ctx.save();
+              ctx.beginPath();
+              ctx.moveTo(x + radius, y);
+              ctx.lineTo(x + scaledWidth - radius, y);
+              ctx.quadraticCurveTo(x + scaledWidth, y, x + scaledWidth, y + radius);
+              ctx.lineTo(x + scaledWidth, y + scaledHeight - radius);
+              ctx.quadraticCurveTo(x + scaledWidth, y + scaledHeight, x + scaledWidth - radius, y + scaledHeight);
+              ctx.lineTo(x + radius, y + scaledHeight);
+              ctx.quadraticCurveTo(x, y + scaledHeight, x, y + scaledHeight - radius);
+              ctx.lineTo(x, y + radius);
+              ctx.quadraticCurveTo(x, y, x + radius, y);
+              ctx.closePath();
+              ctx.clip();
+              
+              // Draw the image
+              ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+              
+              // Add a subtle overlay gradient
+              const overlayGradient = ctx.createLinearGradient(0, y, 0, y + scaledHeight);
+              overlayGradient.addColorStop(0, 'rgba(0, 0, 0, 0.2)');
+              overlayGradient.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+              ctx.fillStyle = overlayGradient;
+              ctx.fillRect(x, y, scaledWidth, scaledHeight);
+              
+              ctx.restore();
+              
+              // Draw project title below the image
+              ctx.font = 'bold 28px Arial';
+              ctx.fillStyle = '#ffffff';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              
+              const title = project.name.length > 20 ? project.name.substring(0, 20) + '...' : project.name;
+              ctx.fillText(title, canvas.width / 2, y + scaledHeight + 30);
+              
+              // Draw description
+              ctx.font = '18px Arial';
+              ctx.fillStyle = '#cccccc';
+              const description = project.description.substring(0, 100) + '...';
+              const descLines = wrapText(ctx, description, canvas.width - 80, 18);
+              descLines.forEach((line, i) => {
+                ctx.fillText(line, canvas.width / 2, y + scaledHeight + 60 + (i * 25));
+              });
+              
+              // Draw "Click to view" text
+              ctx.font = 'bold 20px Arial';
+              ctx.fillStyle = '#80cbc4';
+              ctx.fillText('Click to view', canvas.width / 2, canvas.height - 30);
+              
+              // Create texture from canvas
+              const texture = new THREE.CanvasTexture(canvas);
+              material.map = texture;
+              material.needsUpdate = true;
+            };
+            
+            img.onerror = function() {
+              // If image fails to load, draw a placeholder
+              const x = 40;
+              const y = 40;
+              const width = canvas.width - 80;
+              const height = 200;
+              
+              // Draw placeholder background
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+              ctx.fillRect(x, y, width, height);
+              
+              // Draw placeholder text
+              ctx.font = '24px Arial';
+              ctx.fillStyle = '#ffffff';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('Image not available', canvas.width / 2, y + height / 2);
+              
+              // Continue with the rest of the face content
+              drawFaceContent(ctx, project, y + height + 20);
+            };
+            
+            img.src = getImageUrl(project.images[0]);
+          } else {
+            // If no images available, draw the content without an image
+            drawFaceContent(ctx, project, 40);
+          }
         }
       });
+    }
+
+    function drawFaceContent(ctx, project, startY) {
+      const canvas = ctx.canvas;
+      
+      // Draw project title
+      ctx.font = 'bold 36px Arial';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const title = project.name.length > 20 ? project.name.substring(0, 20) + '...' : project.name;
+      const titleLines = wrapText(ctx, title, canvas.width - 80, 36);
+      titleLines.forEach((line, i) => {
+        ctx.fillText(line, canvas.width / 2, startY + 30 + (i * 40));
+      });
+      
+      // Draw description
+      ctx.font = '20px Arial';
+      ctx.fillStyle = '#cccccc';
+      const description = project.description.substring(0, 150) + '...';
+      const descLines = wrapText(ctx, description, canvas.width - 80, 20);
+      descLines.forEach((line, i) => {
+        ctx.fillText(line, canvas.width / 2, startY + 120 + (i * 25));
+      });
+      
+      // Draw "Click to view" text
+      ctx.font = 'bold 24px Arial';
+      ctx.fillStyle = '#80cbc4';
+      ctx.fillText('Click to view', canvas.width / 2, canvas.height - 30);
     }
 
     // Helper function to wrap text
