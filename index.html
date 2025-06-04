@@ -332,6 +332,36 @@
       padding: 2rem;
       width: 100%;
       flex-wrap: wrap;
+      transition: all 0.5s ease;
+    }
+
+    #additional-projects {
+      width: 45%;
+      transition: all 0.5s ease;
+      flex-shrink: 0;
+    }
+
+    .project-detail-view {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      width: 80%;
+      max-width: 800px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: var(--glass-shadow);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.5s ease;
+    }
+
+    .project-detail-view.active {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
     }
 
     footer {
@@ -750,16 +780,16 @@
       overlay.appendChild(detailView);
       overlay.style.display = 'block';
       
-      // Trigger the transition effect
-      setTimeout(() => {
-        detailView.classList.add('active');
-      }, 50);
-      
       // Adjust container widths and positions
       projectsContainer.style.justifyContent = 'flex-start';
       cubeContainer.style.width = '40%';
-      cubeContainer.style.margin = '0';
+      cubeContainer.style.marginLeft = '0';
       additionalProjects.style.width = '55%';
+      
+      // Trigger the transition effect
+      requestAnimationFrame(() => {
+        detailView.classList.add('active');
+      });
     }
 
     function closeProjectDetail() {
@@ -771,17 +801,16 @@
       
       if (detailView) {
         detailView.classList.remove('active');
+        
+        // Restore original container layout
+        projectsContainer.style.justifyContent = 'center';
+        cubeContainer.style.width = '500px';
+        cubeContainer.style.marginLeft = 'auto';
+        additionalProjects.style.width = '45%';
+        
         setTimeout(() => {
           overlay.innerHTML = '';
           overlay.style.display = 'none';
-          
-          // Restore original container layout
-          projectsContainer.style.justifyContent = 'center';
-          cubeContainer.style.width = '50%';
-          cubeContainer.style.margin = '0 auto';
-          additionalProjects.style.width = '45%';
-          
-          // Reset current project index
           currentProjectIndex = -1;
         }, 500);
       }
