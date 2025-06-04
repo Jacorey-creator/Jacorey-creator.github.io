@@ -271,6 +271,9 @@
       border-radius: 20px;
       padding: 2rem;
       box-shadow: var(--glass-shadow);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     #cube-canvas {
@@ -339,6 +342,7 @@
       width: 45%;
       transition: all 0.5s ease;
       flex-shrink: 0;
+      margin-left: 550px; /* Half of cube width + gap */
     }
 
     footer {
@@ -765,8 +769,10 @@
       // Adjust container widths and positions
       projectsContainer.style.justifyContent = 'flex-start';
       cubeContainer.style.width = '40%';
-      cubeContainer.style.margin = '0';
+      cubeContainer.style.left = '20%';
+      cubeContainer.style.transform = 'translateX(-50%)';
       additionalProjects.style.width = '55%';
+      additionalProjects.style.marginLeft = '0';
     }
 
     function closeProjectDetail() {
@@ -785,8 +791,10 @@
           // Restore original container layout
           projectsContainer.style.justifyContent = 'center';
           cubeContainer.style.width = '500px';
-          cubeContainer.style.margin = '0 auto';
+          cubeContainer.style.left = '50%';
+          cubeContainer.style.transform = 'translateX(-50%)';
           additionalProjects.style.width = '45%';
+          additionalProjects.style.marginLeft = '550px';
           
           // Force a reflow to ensure the transition works
           void cubeContainer.offsetWidth;
