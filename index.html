@@ -503,6 +503,28 @@
       color: var(--hunter-green-light);
       transform: scale(1.1);
     }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 50px;
+      background: var(--hunter-green);
+      transition: all 0.3s ease;
+    }
+
+    .toggle-btn.active {
+      background: var(--hunter-green-light);
+    }
+
+    .toggle-icon {
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-btn.active .toggle-icon {
+      transform: scale(1.2);
+    }
   </style>
 </head>
 <body>
@@ -541,6 +563,9 @@
           <button class="cube-control-btn" onclick="rotateCube('right')">→</button>
           <button class="cube-control-btn" onclick="rotateCube('up')">↑</button>
           <button class="cube-control-btn" onclick="rotateCube('down')">↓</button>
+          <button class="cube-control-btn toggle-btn" id="floatToggle" onclick="toggleFloating()">
+            <span class="toggle-icon">🌊</span>
+          </button>
         </div>
       </div>
       <div id="additional-projects"></div>
@@ -590,6 +615,18 @@
     let isAnimating = false;
     let projects = [];
     let currentProjectIndex = -1; // Track the currently displayed project
+    let isFloatingEnabled = true;
+
+    function toggleFloating() {
+      isFloatingEnabled = !isFloatingEnabled;
+      const toggleBtn = document.getElementById('floatToggle');
+      toggleBtn.classList.toggle('active');
+      
+      if (!isFloatingEnabled) {
+        // Reset cube position when disabling floating
+        cube.position.set(0, 0, 0);
+      }
+    }
 
     function initCube() {
       scene = new THREE.Scene();
@@ -609,21 +646,12 @@
       
       // Create cube geometry with 3x3x3 segments
       const geometry = new THREE.BoxGeometry(2, 2, 2, 3, 3, 3);
+      
+      // Create materials for each face
       const materials = [];
-      
-      // Create materials for each face with desaturated colors
-      const cubeColors = [
-        new THREE.Color(0x8B4513), // Desaturated Red
-        new THREE.Color(0xD2691E), // Desaturated Orange
-        new THREE.Color(0xDAA520), // Desaturated Yellow
-        new THREE.Color(0x556B2F), // Desaturated Green
-        new THREE.Color(0x4682B4), // Desaturated Blue
-        new THREE.Color(0xF5F5DC)  // Desaturated White
-      ];
-      
       for (let i = 0; i < 6; i++) {
         materials.push(new THREE.MeshPhongMaterial({ 
-          color: cubeColors[i],
+          color: 0xffffff,
           transparent: true,
           opacity: 0.9,
           side: THREE.DoubleSide,
@@ -827,7 +855,7 @@
             isSpinning = false;
             velocity = { x: 0, y: 0 };
           }
-        } else if (!isDragging && Date.now() - lastDragTime > 1000) {
+        } else if (!isDragging && Date.now() - lastDragTime > 1000 && isFloatingEnabled) {
           // Update idle animation time
           idleAnimation.time += 0.01;
           
@@ -869,8 +897,8 @@
       const intersects = raycaster.intersectObject(cube);
       
       if (intersects.length > 0) {
-        // Get the actual face index (0-5 for the six faces)
-        const faceIndex = Math.floor(intersects[0].faceIndex / 2);
+        // Get the face index (0-5)
+        const faceIndex = intersects[0].face.materialIndex;
         
         // If clicking the same face that's already open, do nothing
         if (faceIndex === currentProjectIndex) {
@@ -889,7 +917,6 @@
       }
     }
 
-    // Add hover effect function
     function onCubeHover(event) {
       const rect = event.target.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -904,8 +931,8 @@
       const canvas = document.getElementById('cube-canvas');
       
       if (intersects.length > 0) {
-        // Get the actual face index (0-5 for the six faces)
-        const faceIndex = Math.floor(intersects[0].faceIndex / 2);
+        // Get the face index (0-5)
+        const faceIndex = intersects[0].face.materialIndex;
         if (projects[faceIndex]) {
           canvas.style.cursor = 'pointer';
           // Add subtle highlight effect to the face
