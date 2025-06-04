@@ -102,6 +102,21 @@
       perspective: 1000px;
       transition: all 0.5s ease;
       margin: 0 auto;
+      flex-shrink: 0;
+    }
+    
+    #projects {
+      padding: 2rem 1rem;
+      max-width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    #projects h2 {
+      text-align: center;
+      margin-bottom: 2rem;
     }
     
     #projects-container {
@@ -112,6 +127,7 @@
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 1rem;
+      width: 100%;
     }
     
     #additional-projects {
@@ -550,12 +566,15 @@
           const gridSize = 3;
           const cellSize = canvas.width / gridSize;
           
-          // Fill background
-          ctx.fillStyle = '#ffffff';
+          // Fill background with a gradient
+          const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+          gradient.addColorStop(0, '#2c3e50');
+          gradient.addColorStop(1, '#34495e');
+          ctx.fillStyle = gradient;
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           // Draw grid lines
-          ctx.strokeStyle = '#000000';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
           ctx.lineWidth = 2;
           
           for (let i = 1; i < gridSize; i++) {
@@ -573,23 +592,73 @@
           }
           
           // Draw project content in each cell
-          ctx.fillStyle = '#000000';
-          ctx.font = '16px Arial';
-          
           const cells = [
-            { text: project.name, size: 24 },
-            { text: project.description.substring(0, 50) + '...', size: 16 },
-            { text: 'Click to view', size: 16 }
+            { 
+              text: project.name.length > 12 ? project.name.substring(0, 12) + '...' : project.name,
+              size: 32,
+              color: '#ffffff',
+              background: 'rgba(0, 0, 0, 0.3)',
+              padding: 10
+            },
+            { 
+              text: project.description.substring(0, 50) + '...',
+              size: 18,
+              color: '#e0e0e0',
+              background: 'rgba(0, 0, 0, 0.2)',
+              padding: 8
+            },
+            { 
+              text: 'Click to view',
+              size: 20,
+              color: '#80cbc4',
+              background: 'rgba(0, 0, 0, 0.2)',
+              padding: 8
+            }
           ];
           
           cells.forEach((cell, i) => {
-            ctx.font = `${cell.size}px Arial`;
-            const text = cell.text;
-            const textWidth = ctx.measureText(text).width;
-            const x = (cellSize - textWidth) / 2;
-            const y = (i + 1) * cellSize - (cellSize - cell.size) / 2;
-            ctx.fillText(text, x, y);
+            const y = i * cellSize;
+            
+            // Draw cell background
+            ctx.fillStyle = cell.background;
+            ctx.fillRect(0, y, cellSize, cellSize);
+            
+            // Draw text
+            ctx.font = `bold ${cell.size}px Arial`;
+            ctx.fillStyle = cell.color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // For title (first cell), just draw the truncated text
+            if (i === 0) {
+              ctx.fillText(cell.text, cellSize / 2, y + (cellSize / 2));
+            } else {
+              // Word wrap for description and "Click to view"
+              const words = cell.text.split(' ');
+              let line = '';
+              let lineHeight = cell.size * 1.2;
+              let yPos = y + (cellSize / 2) - ((words.length > 1 ? words.length - 1 : 0) * lineHeight / 2);
+              
+              for (let word of words) {
+                const testLine = line + word + ' ';
+                const metrics = ctx.measureText(testLine);
+                
+                if (metrics.width > cellSize - (cell.padding * 2) && line !== '') {
+                  ctx.fillText(line, cellSize / 2, yPos);
+                  line = word + ' ';
+                  yPos += lineHeight;
+                } else {
+                  line = testLine;
+                }
+              }
+              ctx.fillText(line, cellSize / 2, yPos);
+            }
           });
+          
+          // Add subtle border to the entire face
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
           
           // Create texture from canvas
           const texture = new THREE.CanvasTexture(canvas);
