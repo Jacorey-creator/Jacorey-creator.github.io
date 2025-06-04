@@ -335,6 +335,12 @@
       position: relative;
     }
 
+    #additional-projects {
+      width: 45%;
+      transition: all 0.5s ease;
+      flex-shrink: 0;
+    }
+
     footer {
       background: var(--glass-bg);
       backdrop-filter: blur(10px);
@@ -782,6 +788,9 @@
           cubeContainer.style.margin = '0 auto';
           additionalProjects.style.width = '45%';
           
+          // Force a reflow to ensure the transition works
+          void cubeContainer.offsetWidth;
+          
           // Reset current project index
           currentProjectIndex = -1;
         }, 500);
@@ -1046,7 +1055,7 @@
       document.getElementById('additional-projects').style.width = '45%';
     }
 
-    // Update window resize handler
+    // Add window resize handler to maintain cube position
     window.addEventListener('resize', () => {
       const container = document.getElementById('cube-container');
       const width = container.offsetWidth;
