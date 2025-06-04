@@ -658,6 +658,7 @@
       // Add click event listener to canvas
       const canvas = document.getElementById('cube-canvas');
       canvas.addEventListener('click', onCubeClick);
+      canvas.addEventListener('mousemove', onCubeHover);
       
       // Add drag functionality with momentum
       let isDragging = false;
@@ -667,8 +668,8 @@
       let velocity = { x: 0, y: 0 };
       let lastFrameTime = Date.now();
       let isSpinning = false;
-      let friction = 0.95; // Friction coefficient for momentum
-      let minVelocity = 0.0001; // Minimum velocity before stopping
+      let friction = 0.95;
+      let minVelocity = 0.0001;
       let idleAnimation = {
         time: 0,
         amplitude: 0.1,
@@ -693,7 +694,10 @@
       });
       
       canvas.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
+        if (!isDragging) {
+          onCubeHover(e);
+          return;
+        }
         
         const currentTime = Date.now();
         const deltaTime = currentTime - lastDragTime;
@@ -706,7 +710,7 @@
         
         // Calculate velocity based on movement and time
         velocity = {
-          x: deltaMove.x * rotationSpeed / deltaTime * 16, // Normalize to roughly 60fps
+          x: deltaMove.x * rotationSpeed / deltaTime * 16,
           y: deltaMove.y * rotationSpeed / deltaTime * 16
         };
         
@@ -882,6 +886,39 @@
           currentProjectIndex = projectIndex;
           showProjectDetail(projects[projectIndex]);
         }
+      }
+    }
+
+    // Add hover effect function
+    function onCubeHover(event) {
+      const rect = event.target.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2(x, y);
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(cube);
+      
+      const canvas = document.getElementById('cube-canvas');
+      
+      if (intersects.length > 0) {
+        const faceIndex = Math.floor(intersects[0].faceIndex / 6);
+        if (projects[faceIndex]) {
+          canvas.style.cursor = 'pointer';
+          // Add subtle highlight effect to the face
+          const material = cube.material[faceIndex];
+          material.opacity = 1;
+          material.needsUpdate = true;
+        }
+      } else {
+        canvas.style.cursor = 'grab';
+        // Reset all face opacities
+        cube.material.forEach(material => {
+          material.opacity = 0.9;
+          material.needsUpdate = true;
+        });
       }
     }
 
