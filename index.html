@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rowe Bytes</title>
   <link rel="stylesheet" href="Models\home_styling.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     .project-card {
       background: #fff;
@@ -94,6 +95,123 @@
     .close-modal:hover {
       color: #80cbc4;
     }
+    #cube-container {
+      width: 60%;
+      height: 600px;
+      position: relative;
+      perspective: 1000px;
+      transition: width 0.5s ease;
+    }
+    
+    #projects-container {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+    }
+    
+    #additional-projects {
+      width: 35%;
+      transition: all 0.5s ease;
+    }
+    
+    .project-card {
+      background: #1e1e1e;
+      padding: 1.5rem;
+      border: 1px solid #333;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .project-card:hover {
+      transform: translateX(-10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .project-card.expanded {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 800px;
+      z-index: 1000;
+      background: #1e1e1e;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .project-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 999;
+    }
+    
+    .close-expanded {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 1001;
+    }
+    
+    .close-expanded:hover {
+      color: #80cbc4;
+    }
+    
+    #cube-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .cube-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .cube-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      z-index: 100;
+    }
+    
+    .cube-control-btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .cube-control-btn:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -124,7 +242,19 @@
 
   <section id="projects">
     <h2>Projects</h2>
-    <div class="project-list" id="projectList"></div>
+    <div id="projects-container">
+      <div id="cube-container">
+        <canvas id="cube-canvas"></canvas>
+        <div class="cube-controls">
+          <button class="cube-control-btn" onclick="rotateCube('left')">←</button>
+          <button class="cube-control-btn" onclick="rotateCube('right')">→</button>
+          <button class="cube-control-btn" onclick="rotateCube('up')">↑</button>
+          <button class="cube-control-btn" onclick="rotateCube('down')">↓</button>
+        </div>
+      </div>
+      <div id="additional-projects"></div>
+    </div>
+    <div class="project-overlay" id="projectOverlay"></div>
   </section>
 
   <section id="contact">
@@ -159,44 +289,225 @@
         return 'http://localhost:3000/api/projects';
     }
 
-    // Fetch and display projects
-    async function loadProjects() {
-        try {
-            const response = await fetch(getApiUrl());
-            const projects = await response.json();
-            
-            const projectList = document.getElementById('projectList');
-            projectList.innerHTML = projects.map(project => `
-                <div class="project-card">
-                    <h3>${project.name}</h3>
-                    ${project.images.length > 0 ? `
-                        <div class="project-gallery">
-                            ${project.images.map(image => `
-                                <img src="${getImageUrl(image)}" alt="${project.name}" class="project-image">
-                            `).join('')}
-                        </div>
-                    ` : ''}
-                    <p>${project.description}</p>
-                    ${project.webLink ? `
-                        <a href="${project.webLink}" target="_blank" class="project-link">View Project</a>
-                    ` : ''}
-                    ${project.files.length > 0 ? `
-                        <div class="project-files">
-                            <h4>Files:</h4>
-                            <ul>
-                                ${project.files.map(file => `
-                                    <li><a href="${getImageUrl(file)}" target="_blank">${file.split('/').pop()}</a></li>
-                                `).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                </div>
-            `).join('');
-        } catch (error) {
-            console.error('Error loading projects:', error);
-            document.getElementById('projectList').innerHTML = '<p>Error loading projects. Please try again later.</p>';
-        }
+    // Three.js Cube Implementation
+    let scene, camera, renderer, cube;
+    let currentRotation = { x: 0, y: 0 };
+    let isAnimating = false;
+    let projects = [];
+
+    function initCube() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cube-canvas'), antialias: true });
+      renderer.setSize(document.getElementById('cube-container').offsetWidth, document.getElementById('cube-container').offsetHeight);
+      
+      // Create cube geometry
+      const geometry = new THREE.BoxGeometry(2, 2, 2);
+      const materials = [];
+      
+      // Create materials for each face
+      for (let i = 0; i < 6; i++) {
+        materials.push(new THREE.MeshBasicMaterial({ 
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.8,
+          side: THREE.DoubleSide
+        }));
+      }
+      
+      cube = new THREE.Mesh(geometry, materials);
+      scene.add(cube);
+      
+      camera.position.z = 5;
+      
+      // Add ambient light
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+      
+      // Add directional light
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+      directionalLight.position.set(0, 1, 1);
+      scene.add(directionalLight);
+      
+      animate();
     }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+
+    function updateCubeFaces() {
+      projects.forEach((project, index) => {
+        if (index < 6) { // Only use first 6 projects for cube faces
+          const material = cube.material[index];
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          canvas.width = 512;
+          canvas.height = 512;
+          
+          // Draw project content on canvas
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000000';
+          ctx.font = '24px Arial';
+          ctx.fillText(project.name, 20, 40);
+          ctx.font = '16px Arial';
+          ctx.fillText(project.description.substring(0, 100) + '...', 20, 80);
+          
+          // Create texture from canvas
+          const texture = new THREE.CanvasTexture(canvas);
+          material.map = texture;
+          material.needsUpdate = true;
+        }
+      });
+    }
+
+    function rotateCube(direction) {
+      if (isAnimating) return;
+      isAnimating = true;
+      
+      const duration = 1000; // 1 second
+      const startTime = Date.now();
+      const startRotation = { ...currentRotation };
+      
+      let targetRotation = { ...startRotation };
+      switch(direction) {
+        case 'left':
+          targetRotation.y -= Math.PI / 2;
+          break;
+        case 'right':
+          targetRotation.y += Math.PI / 2;
+          break;
+        case 'up':
+          targetRotation.x -= Math.PI / 2;
+          break;
+        case 'down':
+          targetRotation.x += Math.PI / 2;
+          break;
+      }
+      
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Ease in-out function
+        const easeProgress = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+        
+        currentRotation.x = startRotation.x + (targetRotation.x - startRotation.x) * easeProgress;
+        currentRotation.y = startRotation.y + (targetRotation.y - startRotation.y) * easeProgress;
+        
+        cube.rotation.x = currentRotation.x;
+        cube.rotation.y = currentRotation.y;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          isAnimating = false;
+        }
+      }
+      
+      animate();
+    }
+
+    // Modify the loadProjects function to handle additional projects
+    async function loadProjects() {
+      try {
+        const response = await fetch(getApiUrl());
+        projects = await response.json();
+        
+        // Initialize cube if not already done
+        if (!scene) {
+          initCube();
+        }
+        
+        // Update cube faces with first 6 projects
+        updateCubeFaces();
+        
+        // Display additional projects
+        const additionalProjects = projects.slice(6);
+        const additionalProjectsContainer = document.getElementById('additional-projects');
+        
+        if (additionalProjects.length > 0) {
+          additionalProjectsContainer.innerHTML = `
+            <h3>More Projects</h3>
+            ${additionalProjects.map(project => `
+              <div class="project-card" onclick="expandProject(${JSON.stringify(project).replace(/"/g, '&quot;')})">
+                <h3>${project.name}</h3>
+                <p>${project.description.substring(0, 100)}...</p>
+                ${project.images.length > 0 ? `
+                  <div class="project-gallery">
+                    <img src="${getImageUrl(project.images[0])}" alt="${project.name}" class="project-image">
+                  </div>
+                ` : ''}
+              </div>
+            `).join('')}
+          `;
+        } else {
+          additionalProjectsContainer.innerHTML = '';
+        }
+      } catch (error) {
+        console.error('Error loading projects:', error);
+        document.getElementById('projectList').innerHTML = '<p>Error loading projects. Please try again later.</p>';
+      }
+    }
+
+    function expandProject(project) {
+      const overlay = document.getElementById('projectOverlay');
+      const expandedCard = document.createElement('div');
+      expandedCard.className = 'project-card expanded';
+      expandedCard.innerHTML = `
+        <button class="close-expanded" onclick="closeExpandedProject()">&times;</button>
+        <h3>${project.name}</h3>
+        ${project.images.length > 0 ? `
+          <div class="project-gallery">
+            ${project.images.map(image => `
+              <img src="${getImageUrl(image)}" alt="${project.name}" class="project-image">
+            `).join('')}
+          </div>
+        ` : ''}
+        <p>${project.description}</p>
+        ${project.webLink ? `
+          <a href="${project.webLink}" target="_blank" class="project-link">View Project</a>
+        ` : ''}
+        ${project.files.length > 0 ? `
+          <div class="project-files">
+            <h4>Files:</h4>
+            <ul>
+              ${project.files.map(file => `
+                <li><a href="${getImageUrl(file)}" target="_blank">${file.split('/').pop()}</a></li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : ''}
+      `;
+      
+      overlay.appendChild(expandedCard);
+      overlay.style.display = 'block';
+      
+      // Shrink cube container
+      document.getElementById('cube-container').style.width = '40%';
+      document.getElementById('additional-projects').style.width = '55%';
+    }
+
+    function closeExpandedProject() {
+      const overlay = document.getElementById('projectOverlay');
+      overlay.innerHTML = '';
+      overlay.style.display = 'none';
+      
+      // Restore original sizes
+      document.getElementById('cube-container').style.width = '60%';
+      document.getElementById('additional-projects').style.width = '35%';
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      if (camera && renderer) {
+        camera.aspect = document.getElementById('cube-container').offsetWidth / document.getElementById('cube-container').offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(document.getElementById('cube-container').offsetWidth, document.getElementById('cube-container').offsetHeight);
+      }
+    });
 
     // Load projects when the page loads
     document.addEventListener('DOMContentLoaded', loadProjects);
