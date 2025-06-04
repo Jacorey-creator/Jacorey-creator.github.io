@@ -669,6 +669,15 @@
       let isSpinning = false;
       let friction = 0.95; // Friction coefficient for momentum
       let minVelocity = 0.0001; // Minimum velocity before stopping
+      let idleAnimation = {
+        time: 0,
+        amplitude: 0.1,
+        frequency: 0.5,
+        phase: Math.random() * Math.PI * 2
+      };
+
+      // Initial render to ensure cube is visible
+      renderer.render(scene, camera);
       
       // Mouse events
       canvas.addEventListener('mousedown', (e) => {
@@ -775,6 +784,22 @@
       
       // Add cursor styles
       canvas.style.cursor = 'grab';
+      
+      // Add window resize handler
+      function handleResize() {
+        const container = document.getElementById('cube-container');
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+        
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+        renderer.render(scene, camera);
+      }
+
+      // Initial size check and render
+      handleResize();
+      window.addEventListener('resize', handleResize);
       
       // Modify the animate function to include momentum-based spinning
       function animate() {
@@ -1125,10 +1150,12 @@
         // Initialize cube if not already done
         if (!scene) {
           initCube();
+          // Update cube faces immediately after initialization
+          updateCubeFaces();
+        } else {
+          // Update cube faces if cube already exists
+          updateCubeFaces();
         }
-        
-        // Update cube faces with first 6 projects
-        updateCubeFaces();
         
         // Display additional projects
         const additionalProjects = projects.slice(6);
@@ -1205,19 +1232,6 @@
       document.getElementById('cube-container').style.width = '50%';
       document.getElementById('additional-projects').style.width = '45%';
     }
-
-    // Add window resize handler to maintain cube position
-    window.addEventListener('resize', () => {
-      const container = document.getElementById('cube-container');
-      const width = container.offsetWidth;
-      const height = container.offsetHeight;
-      
-      if (camera && renderer) {
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height);
-      }
-    });
 
     // Load projects when the page loads
     document.addEventListener('DOMContentLoaded', loadProjects);
