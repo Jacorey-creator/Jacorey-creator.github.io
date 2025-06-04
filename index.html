@@ -103,6 +103,9 @@
       transition: all 0.5s ease;
       margin: 0 auto;
       flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     #projects {
@@ -122,12 +125,19 @@
     #projects-container {
       display: flex;
       gap: 2rem;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 1rem;
       width: 100%;
+    }
+    
+    #cube-canvas {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 1;
+      display: block;
     }
     
     #additional-projects {
@@ -188,12 +198,6 @@
     
     .close-expanded:hover {
       color: #80cbc4;
-    }
-    
-    #cube-canvas {
-      width: 100%;
-      height: 100%;
-      aspect-ratio: 1;
     }
     
     .cube-face {
@@ -463,6 +467,125 @@
       // Add click event listener to canvas
       const canvas = document.getElementById('cube-canvas');
       canvas.addEventListener('click', onCubeClick);
+      
+      // Add drag functionality
+      let isDragging = false;
+      let previousMousePosition = { x: 0, y: 0 };
+      let rotationSpeed = 0.01;
+      let lastDragTime = 0;
+      let idleAnimation = {
+        time: 0,
+        amplitude: 0.1,
+        frequency: 0.5,
+        phase: Math.random() * Math.PI * 2
+      };
+      
+      // Mouse events
+      canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastDragTime = Date.now();
+        previousMousePosition = {
+          x: e.clientX,
+          y: e.clientY
+        };
+      });
+      
+      canvas.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        const deltaMove = {
+          x: e.clientX - previousMousePosition.x,
+          y: e.clientY - previousMousePosition.y
+        };
+        
+        cube.rotation.y += deltaMove.x * rotationSpeed;
+        cube.rotation.x += deltaMove.y * rotationSpeed;
+        
+        previousMousePosition = {
+          x: e.clientX,
+          y: e.clientY
+        };
+      });
+      
+      canvas.addEventListener('mouseup', () => {
+        isDragging = false;
+        lastDragTime = Date.now();
+      });
+      
+      canvas.addEventListener('mouseleave', () => {
+        isDragging = false;
+        lastDragTime = Date.now();
+      });
+      
+      // Touch events for mobile
+      canvas.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        lastDragTime = Date.now();
+        previousMousePosition = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY
+        };
+      });
+      
+      canvas.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        const deltaMove = {
+          x: e.touches[0].clientX - previousMousePosition.x,
+          y: e.touches[0].clientY - previousMousePosition.y
+        };
+        
+        cube.rotation.y += deltaMove.x * rotationSpeed;
+        cube.rotation.x += deltaMove.y * rotationSpeed;
+        
+        previousMousePosition = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY
+        };
+      });
+      
+      canvas.addEventListener('touchend', () => {
+        isDragging = false;
+        lastDragTime = Date.now();
+      });
+      
+      // Add cursor styles
+      canvas.style.cursor = 'grab';
+      canvas.addEventListener('mousedown', () => {
+        canvas.style.cursor = 'grabbing';
+      });
+      canvas.addEventListener('mouseup', () => {
+        canvas.style.cursor = 'grab';
+      });
+      canvas.addEventListener('mouseleave', () => {
+        canvas.style.cursor = 'grab';
+      });
+      
+      // Modify the animate function to include idle animation
+      function animate() {
+        requestAnimationFrame(animate);
+        
+        if (!isDragging && Date.now() - lastDragTime > 1000) {
+          // Update idle animation time
+          idleAnimation.time += 0.01;
+          
+          // Calculate floating motion
+          const floatY = Math.sin(idleAnimation.time * idleAnimation.frequency + idleAnimation.phase) * idleAnimation.amplitude;
+          const floatX = Math.sin(idleAnimation.time * idleAnimation.frequency * 0.7 + idleAnimation.phase * 1.3) * idleAnimation.amplitude * 0.5;
+          const floatZ = Math.cos(idleAnimation.time * idleAnimation.frequency * 0.5 + idleAnimation.phase * 0.7) * idleAnimation.amplitude * 0.3;
+          
+          // Apply floating motion to cube position
+          cube.position.y = floatY;
+          cube.position.x = floatX;
+          cube.position.z = floatZ;
+          
+          // Add gentle rotation
+          cube.rotation.y += 0.001;
+          cube.rotation.x += 0.0005;
+        }
+        
+        renderer.render(scene, camera);
+      }
       
       animate();
     }
