@@ -6,6 +6,27 @@
   <title>Rowe Bytes</title>
   <link rel="stylesheet" href="Models\home_styling.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Verify Three.js is loaded
+    window.addEventListener('load', function() {
+      if (typeof THREE === 'undefined') {
+        console.error('Three.js failed to load');
+        // Try loading Three.js again
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        script.onload = function() {
+          console.log('Three.js loaded successfully on retry');
+          initCube();
+        };
+        script.onerror = function() {
+          console.error('Failed to load Three.js on retry');
+        };
+        document.head.appendChild(script);
+      } else {
+        console.log('Three.js loaded successfully');
+      }
+    });
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -599,14 +620,8 @@
 
     // Function to get the API URL based on environment
     function getApiUrl() {
-        // Check if we're on GitHub Pages
-        if (window.location.hostname === 'jacorey-creator.github.io') {
-            // For now, we'll use localhost in development
-            // TODO: Replace with your actual production backend URL when deployed
-            return 'http://localhost:3000/api/projects';
-        }
-        // Local development
-        return 'http://localhost:3000/api/projects';
+        // For now, return null to indicate no API is available
+        return null;
     }
 
     // Three.js Cube Implementation
@@ -629,255 +644,90 @@
     }
 
     function initCube() {
-      scene = new THREE.Scene();
-      const container = document.getElementById('cube-container');
-      const width = container.offsetWidth;
-      const height = container.offsetHeight;
-      
-      camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-      renderer = new THREE.WebGLRenderer({ 
-        canvas: document.getElementById('cube-canvas'), 
-        antialias: true,
-        alpha: true
-      });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.setClearColor(0x000000, 0);
-      
-      // Create cube geometry with 3x3x3 segments
-      const geometry = new THREE.BoxGeometry(2, 2, 2, 3, 3, 3);
-      
-      // Create materials for each face
-      const materials = [];
-      for (let i = 0; i < 6; i++) {
-        materials.push(new THREE.MeshPhongMaterial({ 
-          color: 0xffffff,
-          transparent: true,
-          opacity: 0.9,
-          side: THREE.DoubleSide,
-          shininess: 30,
-          specular: 0x444444
-        }));
-      }
-      
-      cube = new THREE.Mesh(geometry, materials);
-      scene.add(cube);
-      
-      // Position camera to show cube properly
-      camera.position.z = 4;
-      
-      // Center the cube in the scene
-      cube.position.set(0, 0, 0);
-      
-      // Add ambient light
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-      scene.add(ambientLight);
-      
-      // Add directional light
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-      directionalLight.position.set(1, 1, 1);
-      scene.add(directionalLight);
-      
-      // Add point light for better 3D effect
-      const pointLight = new THREE.PointLight(0xffffff, 0.5);
-      pointLight.position.set(-2, 2, 2);
-      scene.add(pointLight);
-      
-      // Add click event listener to canvas
-      const canvas = document.getElementById('cube-canvas');
-      canvas.addEventListener('click', onCubeClick);
-      canvas.addEventListener('mousemove', onCubeHover);
-      
-      // Add drag functionality with momentum
-      let isDragging = false;
-      let previousMousePosition = { x: 0, y: 0 };
-      let rotationSpeed = 0.01;
-      let lastDragTime = 0;
-      let velocity = { x: 0, y: 0 };
-      let lastFrameTime = Date.now();
-      let isSpinning = false;
-      let friction = 0.95;
-      let minVelocity = 0.0001;
-      let idleAnimation = {
-        time: 0,
-        amplitude: 0.1,
-        frequency: 0.5,
-        phase: Math.random() * Math.PI * 2
-      };
-
-      // Initial render to ensure cube is visible
-      renderer.render(scene, camera);
-      
-      // Mouse events
-      canvas.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        isSpinning = false;
-        lastDragTime = Date.now();
-        previousMousePosition = {
-          x: e.clientX,
-          y: e.clientY
-        };
-        velocity = { x: 0, y: 0 };
-        canvas.style.cursor = 'grabbing';
-      });
-      
-      canvas.addEventListener('mousemove', (e) => {
-        if (!isDragging) {
-          onCubeHover(e);
+      try {
+        // Check if Three.js is loaded
+        if (typeof THREE === 'undefined') {
+          console.error('Three.js not loaded');
           return;
         }
-        
-        const currentTime = Date.now();
-        const deltaTime = currentTime - lastDragTime;
-        lastDragTime = currentTime;
-        
-        const deltaMove = {
-          x: e.clientX - previousMousePosition.x,
-          y: e.clientY - previousMousePosition.y
-        };
-        
-        // Calculate velocity based on movement and time
-        velocity = {
-          x: deltaMove.x * rotationSpeed / deltaTime * 16,
-          y: deltaMove.y * rotationSpeed / deltaTime * 16
-        };
-        
-        cube.rotation.y += deltaMove.x * rotationSpeed;
-        cube.rotation.x += deltaMove.y * rotationSpeed;
-        
-        previousMousePosition = {
-          x: e.clientX,
-          y: e.clientY
-        };
-      });
-      
-      canvas.addEventListener('mouseup', () => {
-        isDragging = false;
-        isSpinning = true;
-        lastDragTime = Date.now();
-        canvas.style.cursor = 'grab';
-      });
-      
-      canvas.addEventListener('mouseleave', () => {
-        if (isDragging) {
-          isDragging = false;
-          isSpinning = true;
-          lastDragTime = Date.now();
-          canvas.style.cursor = 'grab';
-        }
-      });
-      
-      // Touch events for mobile
-      canvas.addEventListener('touchstart', (e) => {
-        isDragging = true;
-        isSpinning = false;
-        lastDragTime = Date.now();
-        previousMousePosition = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY
-        };
-        velocity = { x: 0, y: 0 };
-      });
-      
-      canvas.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        
-        const currentTime = Date.now();
-        const deltaTime = currentTime - lastDragTime;
-        lastDragTime = currentTime;
-        
-        const deltaMove = {
-          x: e.touches[0].clientX - previousMousePosition.x,
-          y: e.touches[0].clientY - previousMousePosition.y
-        };
-        
-        // Calculate velocity based on movement and time
-        velocity = {
-          x: deltaMove.x * rotationSpeed / deltaTime * 16,
-          y: deltaMove.y * rotationSpeed / deltaTime * 16
-        };
-        
-        cube.rotation.y += deltaMove.x * rotationSpeed;
-        cube.rotation.x += deltaMove.y * rotationSpeed;
-        
-        previousMousePosition = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY
-        };
-      });
-      
-      canvas.addEventListener('touchend', () => {
-        if (isDragging) {
-          isDragging = false;
-          isSpinning = true;
-          lastDragTime = Date.now();
-        }
-      });
-      
-      // Add cursor styles
-      canvas.style.cursor = 'grab';
-      
-      // Add window resize handler
-      function handleResize() {
+
+        scene = new THREE.Scene();
         const container = document.getElementById('cube-container');
+        
+        if (!container) {
+          console.error('Cube container not found');
+          return;
+        }
+
         const width = container.offsetWidth;
         const height = container.offsetHeight;
         
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+        camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ 
+          canvas: document.getElementById('cube-canvas'), 
+          antialias: true,
+          alpha: true
+        });
         renderer.setSize(width, height);
-        renderer.render(scene, camera);
-      }
-
-      // Initial size check and render
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      
-      // Modify the animate function to include momentum-based spinning
-      function animate() {
-        requestAnimationFrame(animate);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setClearColor(0x000000, 0);
         
-        const currentTime = Date.now();
-        const deltaTime = currentTime - lastFrameTime;
-        lastFrameTime = currentTime;
+        // Create cube geometry with 3x3x3 segments
+        const geometry = new THREE.BoxGeometry(2, 2, 2, 3, 3, 3);
         
-        if (isSpinning) {
-          // Apply velocity to rotation
-          cube.rotation.y += velocity.x;
-          cube.rotation.x += velocity.y;
-          
-          // Apply friction
-          velocity.x *= friction;
-          velocity.y *= friction;
-          
-          // Stop spinning if velocity is too low
-          if (Math.abs(velocity.x) < minVelocity && Math.abs(velocity.y) < minVelocity) {
-            isSpinning = false;
-            velocity = { x: 0, y: 0 };
-          }
-        } else if (!isDragging && Date.now() - lastDragTime > 1000 && isFloatingEnabled) {
-          // Update idle animation time
-          idleAnimation.time += 0.01;
-          
-          // Calculate floating motion
-          const floatY = Math.sin(idleAnimation.time * idleAnimation.frequency + idleAnimation.phase) * idleAnimation.amplitude;
-          const floatX = Math.sin(idleAnimation.time * idleAnimation.frequency * 0.7 + idleAnimation.phase * 1.3) * idleAnimation.amplitude * 0.5;
-          const floatZ = Math.cos(idleAnimation.time * idleAnimation.frequency * 0.5 + idleAnimation.phase * 0.7) * idleAnimation.amplitude * 0.3;
-          
-          // Apply floating motion to cube position
-          cube.position.y = floatY;
-          cube.position.x = floatX;
-          cube.position.z = floatZ;
-          
-          // Add gentle rotation
-          cube.rotation.y += 0.001;
-          cube.rotation.x += 0.0005;
+        // Create materials for each face
+        const materials = [];
+        for (let i = 0; i < 6; i++) {
+          materials.push(new THREE.MeshPhongMaterial({ 
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide,
+            shininess: 30,
+            specular: 0x444444
+          }));
         }
         
+        cube = new THREE.Mesh(geometry, materials);
+        scene.add(cube);
+        
+        // Position camera to show cube properly
+        camera.position.z = 4;
+        
+        // Center the cube in the scene
+        cube.position.set(0, 0, 0);
+        
+        // Add ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        
+        // Add directional light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        
+        // Add point light for better 3D effect
+        const pointLight = new THREE.PointLight(0xffffff, 0.5);
+        pointLight.position.set(-2, 2, 2);
+        scene.add(pointLight);
+        
+        // Add click event listener to canvas
+        const canvas = document.getElementById('cube-canvas');
+        if (canvas) {
+          canvas.addEventListener('click', onCubeClick);
+          canvas.addEventListener('mousemove', onCubeHover);
+        }
+        
+        // Initial render to ensure cube is visible
         renderer.render(scene, camera);
+        
+        // Start animation loop
+        animate();
+        
+        console.log('Cube initialized successfully');
+      } catch (error) {
+        console.error('Error initializing cube:', error);
       }
-      
-      animate();
     }
 
     function animate() {
@@ -1274,16 +1124,54 @@
     // Modify the loadProjects function to handle additional projects
     async function loadProjects() {
       try {
-        const response = await fetch(getApiUrl());
-        projects = await response.json();
-        
-        // Initialize cube if not already done
+        // Initialize cube first
         if (!scene) {
           initCube();
-          // Update cube faces immediately after initialization
-          updateCubeFaces();
-        } else {
-          // Update cube faces if cube already exists
+        }
+
+        // Try to fetch projects, but don't let failure stop cube initialization
+        try {
+          const response = await fetch(getApiUrl());
+          projects = await response.json();
+        } catch (error) {
+          console.warn('Could not fetch projects from API:', error);
+          // Create some default projects for the cube faces
+          projects = [
+            {
+              name: "Project 1",
+              description: "A sample project",
+              images: []
+            },
+            {
+              name: "Project 2",
+              description: "Another sample project",
+              images: []
+            },
+            {
+              name: "Project 3",
+              description: "Yet another sample project",
+              images: []
+            },
+            {
+              name: "Project 4",
+              description: "A fourth sample project",
+              images: []
+            },
+            {
+              name: "Project 5",
+              description: "A fifth sample project",
+              images: []
+            },
+            {
+              name: "Project 6",
+              description: "A sixth sample project",
+              images: []
+            }
+          ];
+        }
+        
+        // Update cube faces after projects are loaded
+        if (scene) {
           updateCubeFaces();
         }
         
@@ -1310,8 +1198,11 @@
           additionalProjectsContainer.innerHTML = '';
         }
       } catch (error) {
-        console.error('Error loading projects:', error);
-        document.getElementById('projectList').innerHTML = '<p>Error loading projects. Please try again later.</p>';
+        console.error('Error in loadProjects:', error);
+        // Even if everything fails, try to show a basic cube
+        if (!scene) {
+          initCube();
+        }
       }
     }
 

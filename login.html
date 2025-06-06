@@ -118,12 +118,32 @@
     </div>
 
     <script>
+        // Development credentials (remove in production)
+        const DEV_CREDENTIALS = {
+            username: 'admin',
+            password: 'dev123'
+        };
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
             
+            // Client-side authentication for development
+            if (username === DEV_CREDENTIALS.username && password === DEV_CREDENTIALS.password) {
+                // Store a development token
+                localStorage.setItem('devToken', 'dev_token_' + Date.now());
+                // Redirect to devonly page
+                window.location.href = 'devonly.html';
+            } else {
+                errorMessage.textContent = 'Invalid username or password';
+                errorMessage.style.display = 'block';
+            }
+
+            // Commented out server authentication for now
+            /*
             try {
                 const response = await fetch('http://localhost:3000/api/login', {
                     method: 'POST',
@@ -135,22 +155,19 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    // Store the token
                     localStorage.setItem('devToken', data.token);
-                    // Redirect to devonly page
                     window.location.href = 'devonly.html';
                 } else {
                     const error = await response.json();
-                    const errorMessage = document.getElementById('errorMessage');
                     errorMessage.textContent = error.message || 'Invalid credentials';
                     errorMessage.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                const errorMessage = document.getElementById('errorMessage');
                 errorMessage.textContent = 'An error occurred. Please try again.';
                 errorMessage.style.display = 'block';
             }
+            */
         });
     </script>
 </body>
