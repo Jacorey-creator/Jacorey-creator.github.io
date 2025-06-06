@@ -643,6 +643,7 @@
             fetch(`http://localhost:3000/api/projects/${projectId}`)
                 .then(response => response.json())
                 .then(project => {
+                    // Populate form fields
                     document.getElementById('editProjectName').value = project.name;
                     document.getElementById('editWebLink').value = project.webLink || '';
                     document.getElementById('editDescription').value = project.description;
@@ -650,6 +651,13 @@
                     // Display existing images
                     const preview = document.getElementById('editImagePreview');
                     preview.innerHTML = '';
+                    
+                    // Apply appropriate layout class based on number of images
+                    preview.className = 'image-gallery';
+                    if (project.images.length > 0) {
+                        preview.classList.add(`gallery-layout-${Math.min(project.images.length, 6)}`);
+                    }
+
                     project.images.forEach((image, index) => {
                         const container = document.createElement('div');
                         container.className = 'image-preview-container';
