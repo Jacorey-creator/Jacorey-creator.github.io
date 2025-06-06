@@ -252,6 +252,45 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
     }
 });
 
+// Add update endpoint
+app.put('/api/projects/:id', authenticateToken, upload.fields([
+    { name: 'projectFiles', maxCount: 5 },
+    { name: 'imageGallery', maxCount: 10 }
+]), async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        const { projectName, description, webLink } = req.body;
+        
+        // Update basic fields
+        project.name = projectName;
+        project.description = description;
+        project.webLink = webLink;
+
+        // Handle new files if uploaded
+        if (req.files) {
+            if (req.files['projectFiles']) {
+                const newFiles = req.files['projectFiles'].map(file => `images/${file.filename}`);
+                project.files = [...project.files, ...newFiles];
+            }
+            if (req.files['imageGallery']) {
+                const newImages = req.files['imageGallery'].map(file => `images/${file.filename}`);
+                project.images = [...project.images, ...newImages];
+            }
+        }
+
+        await project.save();
+        res.json(project);
+    } catch (error) {
+        console.error('Error updating project:', error);
+        res.status(500).json({ error: 'Error updating project' });
+    }
+});
+
 app.get('/api/projects', async (req, res) => {
     try {
         const projects = await Project.find().sort({ createdAt: -1 });

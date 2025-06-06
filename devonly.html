@@ -301,6 +301,19 @@
             background: #c82333;
             transform: translateY(-2px);
         }
+        .edit-btn {
+            background: #007bff;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .edit-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
         .confirmation-dialog {
             display: none;
             position: fixed;
@@ -416,6 +429,45 @@
         </div>
     </main>
 
+    <!-- Edit Project Dialog -->
+    <div class="confirmation-dialog" id="editDialog">
+        <div class="confirmation-content">
+            <h3>Edit Project</h3>
+            <form id="editForm" class="dev-form">
+                <div class="form-group">
+                    <label for="editProjectName">Project Name:</label>
+                    <input type="text" id="editProjectName" name="projectName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editProjectFiles">Add Project Files:</label>
+                    <input type="file" id="editProjectFiles" name="projectFiles" multiple>
+                </div>
+
+                <div class="form-group">
+                    <label for="editImageGallery">Add Images:</label>
+                    <input type="file" id="editImageGallery" name="imageGallery" multiple accept="image/*">
+                    <div class="image-gallery" id="editImagePreview"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="editWebLink">Web Link:</label>
+                    <input type="url" id="editWebLink" name="webLink" placeholder="https://">
+                </div>
+
+                <div class="form-group">
+                    <label for="editDescription">Description:</label>
+                    <textarea id="editDescription" name="description" required></textarea>
+                </div>
+
+                <div class="confirmation-buttons">
+                    <button type="submit" class="confirm-delete">Save Changes</button>
+                    <button type="button" class="cancel-delete" onclick="hideEditDialog()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Confirmation Dialog -->
     <div class="confirmation-dialog" id="confirmationDialog">
         <div class="confirmation-content">
@@ -437,6 +489,20 @@
         function logout() {
             localStorage.removeItem('devToken');
             window.location.href = 'login.html';
+        }
+
+        // Function to get the correct image URL
+        function getImageUrl(path) {
+            // If the path is already a full URL, return it
+            if (path.startsWith('http')) {
+                return path;
+            }
+            // If the path already includes 'images/', return it as is
+            if (path.startsWith('images/')) {
+                return path;
+            }
+            // Otherwise, add the images/ prefix
+            return 'images/' + path.replace(/^.*[\\/]/, '');
         }
 
         // Image preview functionality
@@ -552,6 +618,7 @@
                                 <p>${project.description}</p>
                             </div>
                             <div class="project-actions">
+                                <button class="edit-btn" onclick="showEditDialog('${project._id}')">Edit</button>
                                 <button class="delete-btn" onclick="showConfirmationDialog('${project._id}')">Delete</button>
                             </div>
                         </div>
@@ -561,6 +628,138 @@
                 console.error('Error loading projects:', error);
                 document.getElementById('projectsList').innerHTML = '<p>Error loading projects. Please try again later.</p>';
             }
+        }
+
+        // Edit project functionality
+        let projectToEdit = null;
+        let editSelectedImages = [];
+
+        function showEditDialog(projectId) {
+            projectToEdit = projectId;
+            const dialog = document.getElementById('editDialog');
+            dialog.style.display = 'flex';
+
+            // Load project data
+            fetch(`http://localhost:3000/api/projects/${projectId}`)
+                .then(response => response.json())
+                .then(project => {
+                    document.getElementById('editProjectName').value = project.name;
+                    document.getElementById('editWebLink').value = project.webLink || '';
+                    document.getElementById('editDescription').value = project.description;
+                    
+                    // Display existing images
+                    const preview = document.getElementById('editImagePreview');
+                    preview.innerHTML = '';
+                    project.images.forEach((image, index) => {
+                        const container = document.createElement('div');
+                        container.className = 'image-preview-container';
+                        
+                        const img = document.createElement('img');
+                        img.src = getImageUrl(image);
+                        img.className = 'image-preview';
+                        
+                        const countBadge = document.createElement('div');
+                        countBadge.className = 'image-count';
+                        countBadge.textContent = `${index + 1}/${project.images.length}`;
+                        
+                        container.appendChild(img);
+                        container.appendChild(countBadge);
+                        preview.appendChild(container);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading project:', error);
+                    alert('Error loading project data. Please try again.');
+                });
+        }
+
+        function hideEditDialog() {
+            document.getElementById('editDialog').style.display = 'none';
+            projectToEdit = null;
+            editSelectedImages = [];
+            document.getElementById('editImagePreview').innerHTML = '';
+        }
+
+        // Handle edit form submission
+        document.getElementById('editForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!projectToEdit) return;
+
+            const formData = new FormData(this);
+            
+            // Add new images if any
+            editSelectedImages.forEach(image => {
+                formData.append('imageGallery', image.file);
+            });
+            
+            try {
+                const response = await fetch(`http://localhost:3000/api/projects/${projectToEdit}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                hideEditDialog();
+                loadProjects();
+                alert('Project updated successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error updating project. Please try again.');
+            }
+        });
+
+        // Handle image selection in edit form
+        document.getElementById('editImageGallery').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    editSelectedImages.push({
+                        file: file,
+                        preview: e.target.result
+                    });
+                    updateEditImageGallery();
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function updateEditImageGallery() {
+            const preview = document.getElementById('editImagePreview');
+            const existingImages = preview.innerHTML;
+            preview.innerHTML = existingImages;
+            
+            editSelectedImages.forEach((image, index) => {
+                const container = document.createElement('div');
+                container.className = 'image-preview-container';
+                
+                const img = document.createElement('img');
+                img.src = image.preview;
+                img.className = 'image-preview';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'remove-image';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeEditImage(index);
+                
+                const countBadge = document.createElement('div');
+                countBadge.className = 'image-count';
+                countBadge.textContent = `${index + 1}/${editSelectedImages.length}`;
+                
+                container.appendChild(img);
+                container.appendChild(removeBtn);
+                container.appendChild(countBadge);
+                preview.appendChild(container);
+            });
+        }
+
+        function removeEditImage(index) {
+            editSelectedImages.splice(index, 1);
+            updateEditImageGallery();
         }
 
         // Delete project

@@ -95,11 +95,43 @@
         .back-link a:hover {
             text-decoration: underline;
         }
+
+        .server-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #ffeeba;
+            display: none;
+        }
+
+        .server-warning.show {
+            display: block;
+        }
+
+        .server-status {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .server-status.online {
+            color: #28a745;
+        }
+
+        .server-status.offline {
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h1 style="text-align: center; margin-bottom: 2rem;">Developer Login</h1>
+        <div id="serverWarning" class="server-warning">
+            <strong>Warning:</strong> The development server is not running. Please start the server to access developer features.
+        </div>
+        <div id="serverStatus" class="server-status"></div>
         <form class="login-form" id="loginForm">
             <div class="form-group">
                 <label for="username">Username:</label>
@@ -118,11 +150,39 @@
     </div>
 
     <script>
+        // Function to check server status
+        async function checkServerStatus() {
+            const serverWarning = document.getElementById('serverWarning');
+            const serverStatus = document.getElementById('serverStatus');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/projects');
+                if (response.ok) {
+                    serverWarning.classList.remove('show');
+                    serverStatus.textContent = 'Server Status: Online';
+                    serverStatus.className = 'server-status online';
+                } else {
+                    throw new Error('Server responded with an error');
+                }
+            } catch (error) {
+                serverWarning.classList.add('show');
+                serverStatus.textContent = 'Server Status: Offline';
+                serverStatus.className = 'server-status offline';
+            }
+        }
+
+        // Check server status when page loads
+        checkServerStatus();
+        
+        // Check server status every 30 seconds
+        setInterval(checkServerStatus, 30000);
+
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
             
             try {
                 const response = await fetch('http://localhost:3000/api/login', {
@@ -135,21 +195,19 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    // Store the token
                     localStorage.setItem('devToken', data.token);
-                    // Redirect to devonly page
                     window.location.href = 'devonly.html';
                 } else {
                     const error = await response.json();
-                    const errorMessage = document.getElementById('errorMessage');
                     errorMessage.textContent = error.message || 'Invalid credentials';
                     errorMessage.style.display = 'block';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                const errorMessage = document.getElementById('errorMessage');
-                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.textContent = 'Cannot connect to server. Please make sure the server is running.';
                 errorMessage.style.display = 'block';
+                // Show the server warning
+                document.getElementById('serverWarning').classList.add('show');
             }
         });
     </script>
