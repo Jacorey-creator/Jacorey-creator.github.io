@@ -12,19 +12,19 @@ const projectSchema = new mongoose.Schema({
 
 const Project = mongoose.model('Project', projectSchema);
 
-async function updateTankDate() {
+async function revertTankDate() {
   await mongoose.connect(process.env.MONGODB_URI);
   const result = await Project.findOneAndUpdate(
     { name: 'Tactical_Armored_Nanite_Kaizen' },
-    { createdAt: new Date() },
+    { createdAt: new Date('2025-06-06T03:47:01.000Z') },
     { new: true }
   );
   if (result) {
-    console.log('Updated project:', result);
+    console.log('Reverted project:', result);
   } else {
     console.log('Project not found.');
   }
   await mongoose.disconnect();
 }
 
-updateTankDate(); 
+revertTankDate(); 
