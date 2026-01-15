@@ -1,12 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>My Profile Site</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Profile Site</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-  <h1>Hello, I’m Jacorey</h1>
-  <p>This site is hosted on GitHub Pages.</p>
+    <main>
+        <!-- Left/Right headers -->
+        <h2 id="header-software" class="side-header left">Software Experience</h2>
+        <h2 id="header-game" class="side-header right">Game Experience</h2>
+
+        <!-- Center content -->
+        <div class="center-content">
+            <img th:src="${info.profileImageUrl}" class="profile-img" alt="Profile photo">
+            <p class="intro-text" th:utext="${info.intro}">Bio goes here</p>
+        </div>
+    </main>
+
+    <!-- JS -->
+    <script th:src="@{/js/headerFade.js}" defer></script>
 </body>
 </html>
