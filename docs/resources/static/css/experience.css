@@ -1,0 +1,60 @@
+body {
+    font-family: "Montserrat", sans-serif;
+    background-color: var(--background-default);
+    color: var(--text-default);
+    margin: 0;
+    padding: 0;
+}
+
+header{
+    background-color: var(--primary-blue);
+    color:white;
+    padding: 30px 20px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px var(--shadow-medium);
+}
+
+main{
+    max-width: 900px;
+    margin: 50px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.experience-item {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px var(--shadow-medium);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.experience-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px var(--shadow-medium);
+}
+.experience-item h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+.experience-item p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--text-strong);
+}
+.experience-item ul {
+    margin: 0;
+    padding-left: 20px;
+}
+.experience-item ul li {
+    margin-bottom: 8px;
+    font-size: 1rem;
+    color: var(--text-strong);
+}
