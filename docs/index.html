@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Profile Site</title>
@@ -10,8 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" th:href="@{/css/theme.css}">
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <main>
@@ -21,12 +20,12 @@
 
         <!-- Center content -->
         <div class="center-content">
-            <img th:src="${info.profileImageUrl}" class="profile-img" alt="Profile photo">
+            <img src="assets/images/profile.png" class="profile-img" alt="Profile photo">
             <p class="intro-text" th:utext="${info.intro}">Bio goes here</p>
         </div>
     </main>
 
     <!-- JS -->
-    <script src="docs/resources/static/assets/js/headerFade.js" defer></script>
+        <script src="assets/js/headerFade.js" defer></script>
 </body>
 </html>
