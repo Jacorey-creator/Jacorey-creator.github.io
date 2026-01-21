@@ -1,0 +1,149 @@
+/* Header Styles */
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--background-default);
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem 2rem;
+    z-index: 1000;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-header.scrolled {
+    box-shadow: 0 2px 8px var(--shadow-light);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-strong);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.header-logo:hover {
+    color: var(--accent-color);
+}
+
+.header-nav {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.header-nav a {
+    color: var(--text-default);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+    position: relative;
+}
+
+.header-nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+}
+
+.header-nav a:hover::after,
+.header-nav a.active::after {
+    width: 100%;
+}
+
+.header-nav a:hover,
+.header-nav a.active {
+    color: var(--accent-color);
+}
+
+/* Mobile Menu Toggle */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.menu-toggle span {
+    width: 25px;
+    height: 3px;
+    background-color: var(--text-default);
+    transition: all 0.3s ease;
+}
+
+.menu-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Spacer to prevent content from hiding under fixed header */
+.header-spacer {
+    height: 80px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .site-header {
+        padding: 1rem;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .header-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--background-default);
+        flex-direction: column;
+        gap: 0;
+        padding: 1rem 0;
+        border-bottom: 2px solid var(--border-color);
+        transform: translateY(-100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .header-nav.active {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .header-nav a {
+        padding: 0.75rem 2rem;
+        width: 100%;
+    }
+
+    .header-nav a::after {
+        display: none;
+    }
+}

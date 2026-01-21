@@ -52,17 +52,17 @@ main {
         transform 0.3s ease,
         text-shadow 0.3s ease;
     white-space: nowrap;
-    max-width: calc((100vw - var(--center-column)) / 2 - 40px);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    writing-mode: horizontal-tb;
 }
 
 .side-header.left {
-    left: clamp(16px, 3vw, 180px);
+    left: clamp(8px, 2vw, 40px);
+    right: auto;
 }
 
 .side-header.right {
-    right: clamp(16px, 3vw, 180px);
+    right: clamp(8px, 2vw, 40px);
+    left: auto;
 }
 
 .side-header.active {
@@ -111,10 +111,10 @@ main {
 /* ===============================
    Tablet / Small Desktop
    =============================== */
-@media (max-width: 1024px) {
+@media (max-width: 1024px) and (min-width: 769px) {
     .side-header {
         opacity: 0.06;
-        font-size: clamp(1rem, 2vw, 2rem);
+        font-size: clamp(1rem, 1.8vw, 2rem);
     }
 }
 
@@ -164,7 +164,14 @@ main {
 
     .side-header {
         font-size: 3.25rem;
-        max-width: 400px;
+    }
+    
+    .side-header.left {
+        left: clamp(40px, 8vw, 180px);
+    }
+    
+    .side-header.right {
+        right: clamp(40px, 8vw, 180px);
     }
 
     .profile-img {
