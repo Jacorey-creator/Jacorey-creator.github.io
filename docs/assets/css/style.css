@@ -3,6 +3,7 @@
    =============================== */
 :root {
     --center-column: min(70vw, 900px);
+    --side-gutter: clamp(120px, 12vw, 260px);
 }
 
 /* ===============================
@@ -29,7 +30,7 @@ main {
 }
 
 /* ===============================
-   Side Headers
+   Side Headers (NO OVERLAP)
    =============================== */
 .side-header {
     position: fixed;
@@ -44,18 +45,16 @@ main {
         opacity 0.3s ease,
         transform 0.3s ease,
         text-shadow 0.3s ease;
-    max-width: 30vw;
     white-space: nowrap;
+    max-width: 35vw;
 }
 
 .side-header.left {
-    left: max(20px, calc((100vw - var(--center-column)) / 2 - 60px));
-    text-align: left;
+    left: clamp(32px, 8vw, 180px);
 }
 
 .side-header.right {
-    right: max(20px, calc((100vw - var(--center-column)) / 2 - 60px));
-    text-align: right;
+    right: clamp(32px, 8vw, 180px);
 }
 
 .side-header.active {
@@ -100,7 +99,7 @@ main {
    =============================== */
 @media (max-width: 900px) {
     .side-header {
-        opacity: 0.08;
+        opacity: 0.06;
     }
 }
 
@@ -123,6 +122,7 @@ main {
 @media (min-width: 1600px) {
     :root {
         --center-column: 1000px;
+        --side-gutter: 320px;
     }
 
     .side-header {
