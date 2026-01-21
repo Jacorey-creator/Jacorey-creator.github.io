@@ -9,6 +9,10 @@
 /* ===============================
    Base
    =============================== */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: "Montserrat", sans-serif;
     margin: 0;
@@ -16,6 +20,7 @@ body {
     background-color: var(--background-default);
     color: var(--text-default);
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
 }
 
 /* ===============================
@@ -23,7 +28,8 @@ body {
    =============================== */
 main {
     position: relative;
-    width: var(--center-column);
+    width: 100%;
+    max-width: var(--center-column);
     margin: clamp(24px, 6vh, 60px) auto;
     padding-inline: clamp(16px, 4vw, 32px);
     text-align: center;
@@ -36,7 +42,7 @@ main {
     position: fixed;
     top: 50%;
     transform: translateY(-50%);
-    font-size: clamp(1.25rem, 4vw, 3rem);
+    font-size: clamp(1.25rem, 2.5vw, 3rem);
     font-weight: 700;
     opacity: 0.1;
     pointer-events: none;
@@ -46,15 +52,17 @@ main {
         transform 0.3s ease,
         text-shadow 0.3s ease;
     white-space: nowrap;
-    max-width: 35vw;
+    max-width: calc((100vw - var(--center-column)) / 2 - 40px);
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .side-header.left {
-    left: clamp(32px, 8vw, 180px);
+    left: clamp(16px, 3vw, 180px);
 }
 
 .side-header.right {
-    right: clamp(32px, 8vw, 180px);
+    right: clamp(16px, 3vw, 180px);
 }
 
 .side-header.active {
@@ -69,50 +77,79 @@ main {
 .center-content {
     position: relative;
     z-index: 1;
+    width: 100%;
 }
 
 /* ===============================
    Profile Image
    =============================== */
 .profile-img {
-    width: min(60vw, 420px);
+    width: 100%;
+    max-width: min(60vw, 420px);
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 50%;
     margin-bottom: clamp(16px, 4vh, 24px);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* ===============================
    Intro Text
    =============================== */
 .intro-text {
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-size: clamp(0.9rem, 2.5vw, 1.25rem);
     line-height: 1.6;
     font-weight: 700;
     color: var(--text-strong);
-    max-width: min(90vw, 600px);
+    max-width: 100%;
     margin: 0 auto;
+    word-wrap: break-word;
 }
 
 /* ===============================
    Tablet / Small Desktop
    =============================== */
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     .side-header {
         opacity: 0.06;
+        font-size: clamp(1rem, 2vw, 2rem);
     }
 }
 
 /* ===============================
-   Mobile
+   Mobile & Small Tablets
    =============================== */
-@media (max-width: 700px) {
+@media (max-width: 768px) {
     .side-header {
         display: none;
     }
 
     main {
-        width: 100%;
+        margin: clamp(16px, 4vh, 40px) auto;
+    }
+
+    .profile-img {
+        max-width: min(80vw, 300px);
+    }
+}
+
+/* ===============================
+   Small Mobile Devices
+   =============================== */
+@media (max-width: 480px) {
+    main {
+        padding-inline: 20px;
+    }
+
+    .intro-text {
+        font-size: clamp(0.85rem, 4vw, 1rem);
+        line-height: 1.5;
+    }
+
+    .profile-img {
+        max-width: 240px;
     }
 }
 
@@ -127,9 +164,27 @@ main {
 
     .side-header {
         font-size: 3.25rem;
+        max-width: 400px;
     }
 
     .profile-img {
-        width: 460px;
+        max-width: 460px;
+    }
+}
+
+/* ===============================
+   Extra Large Screens (5K+)
+   =============================== */
+@media (min-width: 2400px) {
+    :root {
+        --center-column: 1200px;
+    }
+
+    .side-header {
+        font-size: 4rem;
+    }
+
+    .profile-img {
+        max-width: 520px;
     }
 }
