@@ -1,14 +1,44 @@
+/* ===============================
+   Design Tokens
+   =============================== */
 :root {
-    /* Primary colors */
-    --primary-blue: #007acc;
-    --primary-orange: #ffe0b2;
-    --primary-lightblue: #e0f7fa;
-    --background-default: #f5f5f5;
-    --text-default: #333;
-    --text-strong: #222;
-    --card-background: #ffffff;
+    /* Fonts */
+    --font-display: "Space Grotesk", sans-serif;
+    --font-body: "Plus Jakarta Sans", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
 
-    /* Shadow colors */
-    --shadow-light: rgba(0, 0, 0, 0.08);
-    --shadow-medium: rgba(0, 0, 0, 0.12);
+    /* Base surfaces */
+    --background-default: #FAF7FF;
+    --background-alt: #F1ECFB;
+    --card-background: #FFFFFF;
+    --border-color: #E4DFF5;
+
+    /* Text */
+    --text-strong: #1E1B2E;
+    --text-default: #4B4560;
+    --text-muted: #8B85A3;
+
+    /* Track accents (Software = electric blue/indigo, Game = rose/amber) */
+    --software-1: #0EA5E9;
+    --software-2: #6366F1;
+    --game-1: #FB5D5D;
+    --game-2: #FB923C;
+
+    --gradient-software: linear-gradient(135deg, var(--software-1), var(--software-2));
+    --gradient-game: linear-gradient(135deg, var(--game-1), var(--game-2));
+    --gradient-mixed: linear-gradient(135deg, var(--software-2) 0%, var(--game-1) 100%);
+
+    /* Legacy alias kept for anything still referencing the old single accent */
+    --primary-blue: var(--software-2);
+    --accent-color: var(--software-2);
+
+    /* Shadows */
+    --shadow-light: rgba(30, 27, 46, 0.06);
+    --shadow-medium: rgba(30, 27, 46, 0.12);
+    --shadow-strong: rgba(30, 27, 46, 0.20);
+
+    /* Radii */
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
 }
