@@ -1,152 +1,60 @@
 body {
-    font-family: var(--font-body);
+    font-family: "Montserrat", sans-serif;
     background-color: var(--background-default);
     color: var(--text-default);
     margin: 0;
     padding: 0;
 }
 
-/* Track accent: set per page via body class */
-body.track-software { --track-gradient: var(--gradient-software); --track-tint: rgba(14, 165, 233, 0.10); }
-body.track-game { --track-gradient: var(--gradient-game); --track-tint: rgba(251, 93, 93, 0.10); }
-
-.page-hero {
-    padding: 7rem 20px 3rem;
+header{
+    background-color: var(--primary-blue);
+    color:white;
+    padding: 30px 20px;
     text-align: center;
-}
-
-.page-hero .eyebrow {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-    background-color: var(--card-background);
-    border: 1px solid var(--border-color);
-    padding: 0.35rem 0.9rem;
-    border-radius: 999px;
-    margin-bottom: 1rem;
-}
-
-.page-hero h1 {
-    font-family: var(--font-display);
     font-weight: 700;
-    font-size: clamp(1.8rem, 5vw, 2.6rem);
-    letter-spacing: -0.02em;
-    margin: 0 0 0.5rem;
-    background: var(--track-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-size: 2rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 6px var(--shadow-medium);
 }
 
-.page-hero p {
-    max-width: 52ch;
-    margin: 0 auto;
-    color: var(--text-muted);
-    font-size: 1rem;
-}
-
-main {
-    max-width: 860px;
-    margin: 0 auto 60px;
+main{
+    max-width: 900px;
+    margin: 50px;
     padding: 0 20px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-
 .experience-item {
-    position: relative;
-    background-color: var(--card-background);
-    padding: 1.75rem 1.75rem 1.75rem 2rem;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px var(--shadow-light);
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px var(--shadow-medium);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    overflow: hidden;
-}
-
-.experience-item::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 5px;
-    background: var(--track-gradient);
 }
 
 .experience-item:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 14px 28px var(--shadow-medium);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px var(--shadow-medium);
 }
-
 .experience-item h3 {
     margin: 0 0 10px 0;
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+.experience-item p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
     color: var(--text-strong);
 }
-
-.experience-item p {
-    margin: 0 0 12px;
-    font-size: 0.98rem;
-    line-height: 1.6;
-    color: var(--text-default);
-}
-
-.experience-item p:last-child {
-    margin-bottom: 0;
-}
-
 .experience-item ul {
     margin: 0;
     padding-left: 20px;
 }
-
 .experience-item ul li {
     margin-bottom: 8px;
-    font-size: 0.98rem;
-    color: var(--text-default);
-}
-
-.experience-item ul li:last-child {
-    margin-bottom: 0;
-}
-
-.experience-item img {
-    max-width: 100%;
-    border-radius: var(--radius-sm);
-    margin-top: 0.75rem;
-    display: block;
-    box-shadow: 0 8px 20px var(--shadow-medium);
-}
-
-/* Tag chips: name the concrete tools/skills in each entry */
-.tag-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 12px;
-}
-
-.tag {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
+    font-size: 1rem;
     color: var(--text-strong);
-    background-color: var(--track-tint);
-    border-radius: 999px;
-    padding: 0.28rem 0.7rem;
-}
-
-@media (max-width: 640px) {
-    .page-hero {
-        padding: 6.5rem 16px 2rem;
-    }
-
-    .experience-item {
-        padding: 1.5rem 1.25rem 1.5rem 1.5rem;
-    }
 }
